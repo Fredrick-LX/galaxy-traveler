@@ -1,0 +1,24 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 高级电路 - 复杂电路板 -->
+  <rect x="12" y="12" width="40" height="40" fill="#333333" stroke="#000000" stroke-width="2"/>
+  <!-- 复杂电路线 -->
+  <line x1="18" y1="20" x2="46" y2="20" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="18" y1="28" x2="46" y2="28" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="18" y1="36" x2="46" y2="36" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="18" y1="44" x2="46" y2="44" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="24" y1="16" x2="24" y2="48" stroke="#999999" stroke-width="2"/>
+  <line x1="32" y1="16" x2="32" y2="48" stroke="#999999" stroke-width="2"/>
+  <line x1="40" y1="16" x2="40" y2="48" stroke="#999999" stroke-width="2"/>
+  <!-- 芯片 -->
+  <rect x="26" y="30" width="12" height="12" fill="#666666" stroke="#FFFFFF" stroke-width="1"/>
+  <line x1="28" y1="32" x2="36" y2="40" stroke="#EEEEEE" stroke-width="1"/>
+  <line x1="36" y1="32" x2="28" y2="40" stroke="#EEEEEE" stroke-width="1"/>
+  <!-- 焊点 -->
+  <circle cx="24" cy="20" r="2" fill="#FFFFFF"/>
+  <circle cx="32" cy="20" r="2" fill="#FFFFFF"/>
+  <circle cx="40" cy="20" r="2" fill="#FFFFFF"/>
+  <circle cx="24" cy="44" r="2" fill="#FFFFFF"/>
+  <circle cx="32" cy="44" r="2" fill="#FFFFFF"/>
+  <circle cx="40" cy="44" r="2" fill="#FFFFFF"/>
+</svg>
+

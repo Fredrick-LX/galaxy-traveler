@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 暗物质 - 黑洞效果 -->
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#000000" stroke-width="2"/>
+  <circle cx="32" cy="32" r="16" fill="none" stroke="#333333" stroke-width="2"/>
+  <circle cx="32" cy="32" r="12" fill="none" stroke="#666666" stroke-width="2"/>
+  <circle cx="32" cy="32" r="8" fill="#000000"/>
+  <!-- 扭曲线 -->
+  <path d="M 12,32 Q 16,20 32,20" fill="none" stroke="#999999" stroke-width="1"/>
+  <path d="M 52,32 Q 48,20 32,20" fill="none" stroke="#999999" stroke-width="1"/>
+  <path d="M 12,32 Q 16,44 32,44" fill="none" stroke="#999999" stroke-width="1"/>
+  <path d="M 52,32 Q 48,44 32,44" fill="none" stroke="#999999" stroke-width="1"/>
+  <path d="M 32,12 Q 20,16 20,32" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+  <path d="M 32,52 Q 20,48 20,32" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+  <path d="M 32,12 Q 44,16 44,32" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+  <path d="M 32,52 Q 44,48 44,32" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+</svg>
+

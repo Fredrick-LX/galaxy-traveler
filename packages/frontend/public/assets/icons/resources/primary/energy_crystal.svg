@@ -1,0 +1,11 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 能量晶体 - 对称六边形晶体 -->
+  <polygon points="32,10 46,20 46,40 32,50 18,40 18,20" fill="#FFFFFF" stroke="#000000" stroke-width="2"/>
+  <polygon points="32,10 46,20 40,22 32,18" fill="#CCCCCC"/>
+  <polygon points="18,40 32,50 28,46 20,42" fill="#999999"/>
+  <line x1="32" y1="18" x2="32" y2="46" stroke="#333333" stroke-width="2"/>
+  <line x1="20" y1="24" x2="44" y2="36" stroke="#666666" stroke-width="1"/>
+  <line x1="44" y1="24" x2="20" y2="36" stroke="#666666" stroke-width="1"/>
+  <circle cx="32" cy="30" r="3" fill="#333333"/>
+</svg>
+

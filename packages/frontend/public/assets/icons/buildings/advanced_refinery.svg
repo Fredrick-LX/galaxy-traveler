@@ -1,0 +1,23 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 高级精炼厂 - 大型工厂 -->
+  <rect x="12" y="28" width="40" height="26" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <rect x="16" y="32" width="32" height="18" fill="#CCCCCC"/>
+  <!-- 主烟囱 -->
+  <rect x="34" y="10" width="10" height="20" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <ellipse cx="39" cy="10" rx="5" ry="2" fill="#999999" stroke="#000000" stroke-width="1"/>
+  <!-- 副烟囱 -->
+  <rect x="22" y="18" width="6" height="12" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <ellipse cx="25" cy="18" rx="3" ry="2" fill="#999999" stroke="#000000" stroke-width="1"/>
+  <!-- 烟雾 -->
+  <circle cx="36" cy="4" r="2" fill="none" stroke="#666666" stroke-width="1"/>
+  <circle cx="40" cy="3" r="2" fill="none" stroke="#666666" stroke-width="1"/>
+  <circle cx="42" cy="5" r="2" fill="none" stroke="#999999" stroke-width="1"/>
+  <circle cx="23" cy="12" r="2" fill="none" stroke="#999999" stroke-width="1"/>
+  <!-- 窗户 -->
+  <rect x="20" y="36" width="6" height="6" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <rect x="30" y="36" width="6" height="6" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <rect x="40" y="36" width="6" height="6" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <rect x="20" y="44" width="6" height="6" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <rect x="40" y="44" width="6" height="6" fill="#333333" stroke="#000000" stroke-width="1"/>
+</svg>
+

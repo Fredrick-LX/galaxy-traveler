@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+  <!-- 门框 -->
+  <path d="M9 21 L5 21 C4 21 3 20 3 19 L3 5 C3 4 4 3 5 3 L9 3" />
+  <!-- 箭头主体 -->
+  <path d="M16 17 L21 12 L16 7" />
+  <path d="M21 12 L9 12" />
+</svg>
+

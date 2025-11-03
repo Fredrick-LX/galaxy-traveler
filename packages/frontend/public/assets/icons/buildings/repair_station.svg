@@ -1,0 +1,21 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 维修站 - 工具符号 -->
+  <rect x="14" y="32" width="36" height="22" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <rect x="18" y="36" width="28" height="14" fill="#CCCCCC"/>
+  <!-- 扳手 -->
+  <rect x="22" y="16" width="4" height="18" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <circle cx="24" cy="14" r="4" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <path d="M 20,14 L 22,12 L 22,16 Z" fill="#CCCCCC"/>
+  <path d="M 28,14 L 26,12 L 26,16 Z" fill="#CCCCCC"/>
+  <!-- 焊枪 -->
+  <rect x="38" y="16" width="4" height="18" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <polygon points="36,14 40,10 44,14" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <!-- 火花 -->
+  <line x1="34" y1="12" x2="32" y2="10" stroke="#CCCCCC" stroke-width="1"/>
+  <line x1="36" y1="10" x2="34" y2="8" stroke="#CCCCCC" stroke-width="1"/>
+  <line x1="38" y1="8" x2="38" y2="6" stroke="#CCCCCC" stroke-width="1"/>
+  <!-- 窗户 -->
+  <rect x="22" y="40" width="6" height="6" fill="#333333"/>
+  <rect x="36" y="40" width="6" height="6" fill="#333333"/>
+</svg>
+

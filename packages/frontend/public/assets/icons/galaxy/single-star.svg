@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 单星系统 - 单个恒星 -->
+  <circle cx="32" cy="32" r="12" fill="#FFFFFF" stroke="#000000" stroke-width="2"/>
+  <circle cx="32" cy="32" r="9" fill="#EEEEEE"/>
+  <circle cx="32" cy="32" r="6" fill="#CCCCCC"/>
+  <!-- 光芒 -->
+  <polygon points="32,14 33,26 31,26" fill="#CCCCCC"/>
+  <polygon points="32,50 33,38 31,38" fill="#CCCCCC"/>
+  <polygon points="14,32 26,33 26,31" fill="#CCCCCC"/>
+  <polygon points="50,32 38,33 38,31" fill="#CCCCCC"/>
+</svg>
+

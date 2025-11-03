@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 武器部件 - 炮管 -->
+  <rect x="12" y="26" width="30" height="12" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <rect x="42" y="24" width="8" height="16" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <polygon points="50,28 54,30 54,34 50,36" fill="#CCCCCC" stroke="#000000" stroke-width="2"/>
+  <!-- 细节 -->
+  <line x1="18" y1="30" x2="36" y2="30" stroke="#333333" stroke-width="2"/>
+  <line x1="18" y1="34" x2="36" y2="34" stroke="#333333" stroke-width="2"/>
+  <rect x="22" y="22" width="4" height="4" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <rect x="30" y="22" width="4" height="4" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <rect x="22" y="38" width="4" height="4" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <rect x="30" y="38" width="4" height="4" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <!-- 瞄准线 -->
+  <line x1="44" y1="28" x2="48" y2="28" stroke="#EEEEEE" stroke-width="1"/>
+  <line x1="46" y1="26" x2="46" y2="30" stroke="#EEEEEE" stroke-width="1"/>
+</svg>
+

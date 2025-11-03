@@ -1,0 +1,11 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 燃料 - 油桶带火焰标志 -->
+  <ellipse cx="32" cy="18" rx="14" ry="4" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <rect x="18" y="18" width="28" height="32" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <ellipse cx="32" cy="50" rx="14" ry="4" fill="#333333" stroke="#000000" stroke-width="2"/>
+  <line x1="18" y1="28" x2="46" y2="28" stroke="#999999" stroke-width="2"/>
+  <line x1="18" y1="42" x2="46" y2="42" stroke="#999999" stroke-width="2"/>
+  <!-- 火焰符号 -->
+  <path d="M 32,24 L 28,32 L 30,32 L 28,38 L 36,30 L 34,30 L 36,24 Z" fill="#CCCCCC" stroke="#000000" stroke-width="1"/>
+</svg>
+

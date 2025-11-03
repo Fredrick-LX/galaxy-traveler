@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 护盾发生器 - 护盾投射器 -->
+  <rect x="22" y="36" width="20" height="16" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <polygon points="22,36 26,32 38,32 42,36" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <rect x="28" y="28" width="8" height="6" fill="#CCCCCC" stroke="#000000" stroke-width="2"/>
+  <!-- 护盾 -->
+  <path d="M 32,12 L 44,18 L 44,28 L 32,34 L 20,28 L 20,18 Z" fill="none" stroke="#CCCCCC" stroke-width="2"/>
+  <path d="M 32,14 L 42,19 L 42,27 L 32,32 L 22,27 L 22,19 Z" fill="none" stroke="#EEEEEE" stroke-width="1" stroke-dasharray="2,2"/>
+  <!-- 发射器细节 -->
+  <circle cx="32" cy="28" r="2" fill="#FFFFFF"/>
+  <line x1="26" y1="40" x2="38" y2="40" stroke="#333333" stroke-width="1"/>
+  <line x1="26" y1="44" x2="38" y2="44" stroke="#333333" stroke-width="1"/>
+  <line x1="26" y1="48" x2="38" y2="48" stroke="#333333" stroke-width="1"/>
+</svg>
+

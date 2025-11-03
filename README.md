@@ -1,24 +1,139 @@
-# galaxy-traveler
+# 星河旅者 (Galaxy Traveler)
 
-## Project setup
+一个由代码操控的自动化建设探索PVP游戏。
+
+## 项目结构
+
 ```
+galaxy-traveler/
+├── packages/
+│   ├── shared/          # 共享类型定义包
+│   │   └── src/
+│   │       └── types/
+│   │           ├── ships.ts      # 船舶类型
+│   │           ├── buildings.ts  # 建筑类型
+│   │           └── resources.ts  # 资源类型
+│   ├── backend/         # 后端服务
+│   │   └── src/
+│   │       ├── config/
+│   │       │   └── gameData.ts   # 游戏数据配置
+│   │       ├── db/
+│   │       ├── routes/
+│   │       └── services/
+│   └── frontend/        # 前端应用
+│       └── src/
+│           ├── components/
+│           └── views/
+└── pnpm-workspace.yaml  # pnpm工作区配置
+```
+
+## 游戏系统
+
+### 🚀 船舶系统
+
+#### 战舰 (Warship)
+- **驱逐舰**: 快速机动，适合侦察和骚扰
+- **巡洋舰**: 平衡的攻防能力
+- **战列舰**: 强大的火力和装甲
+- **航空母舰**: 可部署战斗机群
+
+每种战舰都有不同的部件槽配置和容量限制。
+
+#### 探索船 (Explorer Ship)
+分为5个等级，每级提供：
+- 武器加成
+- 生命值加成
+- 速度加成
+- 扫描范围
+
+#### 工程船 (Engineer Ship)
+分为5个等级，每级提供：
+- 货物容量加成
+- 速度加成
+- 建设速度加成
+- 采集效率加成
+
+### 🏭 建筑系统
+
+#### 采矿设施
+- **矿石提取器**: 采集铁、铜、钛等矿石
+- **气体采集器**: 采集氢气、氦气等气体
+- **晶体采矿机**: 采集能量晶体等稀有资源
+- **液体泵**: 采集原油、水等液体资源
+
+#### 加工设施
+- **基础精炼厂** (Tier 1): 加工一产资源
+- **高级精炼厂** (Tier 2): 加工更高级资源
+- **化工厂**: 生产化学品和塑料
+- **组装厂**: 组装复杂部件
+- **高科技制造厂** (Tier 3): 生产战略资源
+
+#### 建造设施
+- **船坞**: 建造各类船舶
+- **部件工厂**: 生产船舶部件
+- **维修站**: 修复损坏的船舶和建筑
+
+### 📦 资源系统
+
+#### 一产资源 (Primary)
+可以直接通过工程船或采矿设施采集：
+- **矿石类**: 铁矿石、铜矿石、钛矿石、稀有金属矿石
+- **气体类**: 氢气、氦气、氮气
+- **晶体类**: 能量晶体、硅晶体
+- **液体类**: 原油、水
+
+#### 二产资源 (Secondary)
+需要通过加工设施加工一产获得：
+- **金属材料**: 铁板、铜板、钛合金、稀有金属锭
+- **化学品**: 塑料、燃料、化学试剂
+- **电子元件**: 基础电路、硅晶圆
+- **能源**: 能量电池
+
+#### 三产资源 (Tertiary)
+需要消耗一产和二产通过更高级设施获得：
+- **高级材料**: 复合材料、超导体、纳米材料
+- **高级组件**: 高级电路、量子处理器、反应堆核心
+- **装备部件**: 武器部件、装甲板、引擎模块、护盾发生器
+
+#### 四产资源 (Quaternary)
+在使用三产过程中产出的特殊资源：
+- **研究数据**: 用于科技研发
+- **稀有资源**: 反物质、暗物质、奇异粒子
+- **特殊货币**: 科技点、战略资源
+
+## 开发
+
+### 安装依赖
+
+```bash
 pnpm install
 ```
 
-### Compiles and hot-reloads for development
-```
-pnpm run serve
+### 编译共享类型包
+
+```bash
+cd packages/shared
+pnpm build
 ```
 
-### Compiles and minifies for production
-```
-pnpm run build
+### 启动后端
+
+```bash
+cd packages/backend
+pnpm dev
 ```
 
-### Lints and fixes files
-```
-pnpm run lint
+### 启动前端
+
+```bash
+cd packages/frontend
+pnpm dev
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## 技术栈
+
+- **前端**: Vue 3 + TypeScript + Vite
+- **后端**: Node.js + Express + TypeScript + Socket.IO
+- **数据库**: LevelDB
+- **工作区管理**: pnpm workspace
+- **共享类型**: TypeScript declarations

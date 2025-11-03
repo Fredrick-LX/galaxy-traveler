@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 气体采集器 - 吸气装置 -->
+  <rect x="20" y="12" width="24" height="16" fill="#CCCCCC" stroke="#000000" stroke-width="2"/>
+  <rect x="26" y="28" width="12" height="8" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <rect x="28" y="36" width="8" height="16" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <!-- 进气口 -->
+  <ellipse cx="32" cy="20" rx="8" ry="4" fill="none" stroke="#333333" stroke-width="2"/>
+  <ellipse cx="32" cy="18" rx="6" ry="3" fill="none" stroke="#666666" stroke-width="1"/>
+  <!-- 气流 -->
+  <path d="M 24,10 Q 28,6 32,8" fill="none" stroke="#999999" stroke-width="1"/>
+  <path d="M 32,8 Q 36,6 40,10" fill="none" stroke="#999999" stroke-width="1"/>
+  <circle cx="26" cy="8" r="2" fill="none" stroke="#999999" stroke-width="1"/>
+  <circle cx="38" cy="8" r="2" fill="none" stroke="#999999" stroke-width="1"/>
+  <circle cx="32" cy="4" r="2" fill="none" stroke="#999999" stroke-width="1"/>
+  <!-- 底座 -->
+  <rect x="24" y="52" width="16" height="4" fill="#333333" stroke="#000000" stroke-width="2"/>
+</svg>
+

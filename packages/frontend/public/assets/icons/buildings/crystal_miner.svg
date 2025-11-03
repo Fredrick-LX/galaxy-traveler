@@ -1,0 +1,19 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 晶体采矿机 - 激光切割器 -->
+  <rect x="24" y="8" width="16" height="14" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <rect x="22" y="22" width="20" height="8" fill="#CCCCCC" stroke="#000000" stroke-width="2"/>
+  <rect x="28" y="30" width="8" height="12" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <!-- 激光束 -->
+  <line x1="30" y1="42" x2="28" y2="52" stroke="#333333" stroke-width="2"/>
+  <line x1="34" y1="42" x2="36" y2="52" stroke="#333333" stroke-width="2"/>
+  <line x1="32" y1="42" x2="32" y2="54" stroke="#000000" stroke-width="2"/>
+  <!-- 晶体 -->
+  <polygon points="32,54 36,52 34,56 32,54" fill="#CCCCCC" stroke="#000000" stroke-width="1"/>
+  <polygon points="32,54 28,52 30,56 32,54" fill="#EEEEEE" stroke="#000000" stroke-width="1"/>
+  <!-- 细节 -->
+  <circle cx="28" cy="12" r="2" fill="#666666"/>
+  <circle cx="36" cy="12" r="2" fill="#666666"/>
+  <rect x="26" y="16" width="12" height="2" fill="#333333"/>
+  <line x1="26" y1="26" x2="38" y2="26" stroke="#999999" stroke-width="1"/>
+</svg>
+

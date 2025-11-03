@@ -1,0 +1,19 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 脉冲星 - 发射脉冲光束 -->
+  <circle cx="32" cy="32" r="8" fill="#EEEEEE" stroke="#000000" stroke-width="2"/>
+  <circle cx="32" cy="32" r="5" fill="#999999"/>
+  <!-- 脉冲光束 -->
+  <line x1="32" y1="8" x2="32" y2="20" stroke="#666666" stroke-width="3" opacity="0.8"/>
+  <line x1="32" y1="56" x2="32" y2="44" stroke="#666666" stroke-width="3" opacity="0.8"/>
+  <line x1="8" y1="32" x2="20" y2="32" stroke="#666666" stroke-width="3" opacity="0.8"/>
+  <line x1="56" y1="32" x2="44" y2="32" stroke="#666666" stroke-width="3" opacity="0.8"/>
+  <!-- 斜向光束 -->
+  <line x1="14" y1="14" x2="22" y2="22" stroke="#999999" stroke-width="2" opacity="0.6"/>
+  <line x1="50" y1="50" x2="42" y2="42" stroke="#999999" stroke-width="2" opacity="0.6"/>
+  <line x1="50" y1="14" x2="42" y2="22" stroke="#999999" stroke-width="2" opacity="0.6"/>
+  <line x1="14" y1="50" x2="22" y2="42" stroke="#999999" stroke-width="2" opacity="0.6"/>
+  <!-- 脉冲环 -->
+  <circle cx="32" cy="32" r="14" fill="none" stroke="#CCCCCC" stroke-width="1" opacity="0.5"/>
+  <circle cx="32" cy="32" r="18" fill="none" stroke="#CCCCCC" stroke-width="1" opacity="0.3"/>
+</svg>
+

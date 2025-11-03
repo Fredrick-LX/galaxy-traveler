@@ -1,0 +1,9 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 钛矿石 - 菱形晶体结构 -->
+  <polygon points="32,10 48,26 32,54 16,26" fill="#CCCCCC" stroke="#000000" stroke-width="2"/>
+  <polygon points="32,10 48,26 42,28 32,18" fill="#FFFFFF"/>
+  <polygon points="16,26 32,54 26,48 18,32" fill="#666666"/>
+  <polygon points="32,18 42,28 32,36 22,28" fill="#999999" stroke="#333333" stroke-width="2"/>
+  <line x1="32" y1="36" x2="32" y2="48" stroke="#333333" stroke-width="2"/>
+</svg>
+

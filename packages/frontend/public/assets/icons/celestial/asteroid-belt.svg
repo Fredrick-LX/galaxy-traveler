@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 小行星带 - 多个小碎石 -->
+  <polygon points="12,28 16,26 18,30 14,32" fill="#999999" stroke="#000000" stroke-width="1"/>
+  <polygon points="22,22 28,20 30,26 24,28" fill="#666666" stroke="#000000" stroke-width="1"/>
+  <polygon points="38,18 44,16 46,22 40,24" fill="#CCCCCC" stroke="#000000" stroke-width="1"/>
+  <polygon points="52,24 56,22 58,28 54,30" fill="#999999" stroke="#000000" stroke-width="1"/>
+  <polygon points="18,38 22,36 24,42 20,44" fill="#CCCCCC" stroke="#000000" stroke-width="1"/>
+  <polygon points="34,34 40,32 42,38 36,40" fill="#666666" stroke="#000000" stroke-width="1"/>
+  <polygon points="48,40 52,38 54,44 50,46" fill="#999999" stroke="#000000" stroke-width="1"/>
+  <!-- 小碎片 -->
+  <circle cx="30" cy="30" r="2" fill="#666666"/>
+  <circle cx="44" cy="34" r="1.5" fill="#999999"/>
+  <circle cx="26" cy="42" r="1.5" fill="#CCCCCC"/>
+</svg>
+

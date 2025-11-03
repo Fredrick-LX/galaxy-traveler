@@ -1,0 +1,10 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 铜矿石 - 带纹理的矿石 -->
+  <polygon points="28,10 46,18 50,38 36,52 18,46 14,26" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <polygon points="28,10 46,18 42,16 30,12" fill="#CCCCCC"/>
+  <polygon points="18,46 36,52 32,48 20,44" fill="#666666"/>
+  <circle cx="30" cy="28" r="4" fill="#333333"/>
+  <circle cx="38" cy="34" r="3" fill="#333333"/>
+  <line x1="24" y1="30" x2="40" y2="36" stroke="#333333" stroke-width="2"/>
+</svg>
+

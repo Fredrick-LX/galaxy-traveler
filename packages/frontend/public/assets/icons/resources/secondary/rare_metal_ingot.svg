@@ -1,0 +1,10 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 稀有金属锭 - 金属锭 -->
+  <path d="M 16,32 L 20,20 L 44,20 L 48,32 L 44,44 L 20,44 Z" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <polygon points="20,20 22,18 46,18 44,20" fill="#999999"/>
+  <polygon points="44,20 46,18 48,28 48,32" fill="#333333"/>
+  <line x1="20" y1="28" x2="44" y2="28" stroke="#333333" stroke-width="1"/>
+  <line x1="20" y1="36" x2="44" y2="36" stroke="#333333" stroke-width="1"/>
+  <rect x="28" y="24" width="8" height="4" fill="#CCCCCC"/>
+</svg>
+

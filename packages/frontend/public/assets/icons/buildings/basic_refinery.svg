@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 基础精炼厂 - 简单工厂 -->
+  <rect x="16" y="28" width="32" height="26" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <rect x="20" y="32" width="24" height="18" fill="#CCCCCC"/>
+  <!-- 烟囱 -->
+  <rect x="36" y="14" width="8" height="16" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <ellipse cx="40" cy="14" rx="4" ry="2" fill="#999999" stroke="#000000" stroke-width="1"/>
+  <!-- 烟雾 -->
+  <circle cx="38" cy="8" r="2" fill="none" stroke="#666666" stroke-width="1"/>
+  <circle cx="42" cy="6" r="2" fill="none" stroke="#666666" stroke-width="1"/>
+  <circle cx="40" cy="4" r="2" fill="none" stroke="#999999" stroke-width="1"/>
+  <!-- 窗户 -->
+  <rect x="24" y="36" width="6" height="6" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <rect x="34" y="36" width="6" height="6" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <!-- 门 -->
+  <rect x="28" y="44" width="8" height="10" fill="#666666" stroke="#000000" stroke-width="2"/>
+</svg>
+

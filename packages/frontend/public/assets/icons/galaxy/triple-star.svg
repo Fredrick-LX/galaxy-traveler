@@ -1,0 +1,14 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 三星系统 - 三个恒星成三角形 -->
+  <circle cx="32" cy="20" r="8" fill="#EEEEEE" stroke="#000000" stroke-width="2"/>
+  <circle cx="32" cy="20" r="5" fill="#CCCCCC"/>
+  <circle cx="20" cy="40" r="7" fill="#EEEEEE" stroke="#000000" stroke-width="2"/>
+  <circle cx="20" cy="40" r="4" fill="#CCCCCC"/>
+  <circle cx="44" cy="40" r="7" fill="#EEEEEE" stroke="#000000" stroke-width="2"/>
+  <circle cx="44" cy="40" r="4" fill="#CCCCCC"/>
+  <!-- 引力连接 -->
+  <line x1="32" y1="20" x2="20" y2="40" stroke="#666666" stroke-width="1" stroke-dasharray="2,2" opacity="0.4"/>
+  <line x1="32" y1="20" x2="44" y2="40" stroke="#666666" stroke-width="1" stroke-dasharray="2,2" opacity="0.4"/>
+  <line x1="20" y1="40" x2="44" y2="40" stroke="#666666" stroke-width="1" stroke-dasharray="2,2" opacity="0.4"/>
+</svg>
+

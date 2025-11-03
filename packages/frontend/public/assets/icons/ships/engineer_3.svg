@@ -1,0 +1,33 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 工程船 等级3 -->
+  <rect x="20" y="12" width="24" height="36" fill="#999999" stroke="#000000" stroke-width="2"/>
+  <rect x="22" y="14" width="20" height="32" fill="#CCCCCC"/>
+  <!-- 双工具臂 -->
+  <rect x="16" y="22" width="4" height="12" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <rect x="44" y="22" width="4" height="12" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <circle cx="18" cy="28" r="3" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <circle cx="46" cy="28" r="3" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <circle cx="18" cy="32" r="2" fill="#666666"/>
+  <circle cx="46" cy="32" r="2" fill="#666666"/>
+  <line x1="14" y1="28" x2="12" y2="28" stroke="#333333" stroke-width="2"/>
+  <line x1="50" y1="28" x2="52" y2="28" stroke="#333333" stroke-width="2"/>
+  <rect x="12" y="30" width="4" height="4" fill="#333333"/>
+  <rect x="48" y="30" width="4" height="4" fill="#333333"/>
+  <!-- 驾驶舱 -->
+  <rect x="26" y="16" width="12" height="8" fill="#EEEEEE" stroke="#000000" stroke-width="1"/>
+  <line x1="30" y1="18" x2="34" y2="18" stroke="#666666" stroke-width="1"/>
+  <!-- 大型货舱 -->
+  <rect x="24" y="28" width="16" height="16" fill="#666666" stroke="#000000" stroke-width="1"/>
+  <line x1="24" y1="32" x2="40" y2="32" stroke="#333333" stroke-width="1"/>
+  <line x1="24" y1="36" x2="40" y2="36" stroke="#333333" stroke-width="1"/>
+  <line x1="24" y1="40" x2="40" y2="40" stroke="#333333" stroke-width="1"/>
+  <line x1="32" y1="28" x2="32" y2="44" stroke="#333333" stroke-width="1"/>
+  <!-- 推进器组 -->
+  <polygon points="24,48 32,52 40,48" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <line x1="26" y1="52" x2="26" y2="56" stroke="#999999" stroke-width="1"/>
+  <line x1="32" y1="52" x2="32" y2="58" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="38" y1="52" x2="38" y2="56" stroke="#999999" stroke-width="1"/>
+  <!-- 等级标记 -->
+  <text x="32" y="42" font-size="8" text-anchor="middle" fill="#EEEEEE" font-weight="bold">III</text>
+</svg>
+

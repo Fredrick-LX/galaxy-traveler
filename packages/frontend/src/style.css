@@ -1,0 +1,104 @@
+/**
+ * 全局样式 - 像素风格
+ */
+
+/* 重置样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 全局变量 - 仅使用黑白灰 */
+:root {
+  /* 黑白灰色系 (0-255灰度) */
+  --color-black: #000000;
+  --color-gray-900: #111111;
+  --color-gray-800: #222222;
+  --color-gray-700: #333333;
+  --color-gray-600: #666666;
+  --color-gray-500: #888888;
+  --color-gray-400: #999999;
+  --color-gray-300: #CCCCCC;
+  --color-gray-200: #EEEEEE;
+  --color-gray-100: #F5F5F5;
+  --color-white: #FFFFFF;
+  
+  /* 语义化颜色 */
+  --text-primary: var(--color-black);
+  --text-secondary: var(--color-gray-600);
+  --text-tertiary: var(--color-gray-400);
+  --border-color: var(--color-gray-700);
+  --border-light: var(--color-gray-300);
+  --bg-primary: var(--color-white);
+  --bg-secondary: var(--color-gray-100);
+  --bg-dark: var(--color-gray-900);
+  
+  /* 字体 - 等宽字体 */
+  font-family: 'Courier New', Courier, monospace, 'Microsoft YaHei', sans-serif;
+  
+  /* 像素化渲染 */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  
+  /* 其他 */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* 滚动条样式 - 像素风格 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-200);
+  border: 1px solid var(--color-gray-300);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-600);
+  border: 1px solid var(--color-gray-700);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-black);
+}
+
+/* 通用工具类 */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+

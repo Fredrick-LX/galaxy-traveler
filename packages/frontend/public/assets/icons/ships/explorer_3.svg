@@ -1,0 +1,26 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 探索船 等级3 -->
+  <polygon points="32,10 44,18 42,36 32,44 22,36 20,18" fill="#CCCCCC" stroke="#000000" stroke-width="2"/>
+  <polygon points="32,10 42,16 40,32 32,40" fill="#EEEEEE"/>
+  <!-- 高级探测器 -->
+  <circle cx="32" cy="20" r="6" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <circle cx="32" cy="20" r="4" fill="#FFFFFF"/>
+  <circle cx="32" cy="20" r="2" fill="#333333"/>
+  <circle cx="24" cy="26" r="4" fill="#999999" stroke="#000000" stroke-width="1"/>
+  <circle cx="40" cy="26" r="4" fill="#999999" stroke="#000000" stroke-width="1"/>
+  <!-- 天线阵列 -->
+  <line x1="24" y1="16" x2="18" y2="12" stroke="#666666" stroke-width="2"/>
+  <line x1="32" y1="14" x2="32" y2="8" stroke="#666666" stroke-width="2"/>
+  <line x1="40" y1="16" x2="46" y2="12" stroke="#666666" stroke-width="2"/>
+  <circle cx="18" cy="12" r="2" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <circle cx="32" cy="8" r="2" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <circle cx="46" cy="12" r="2" fill="#333333" stroke="#000000" stroke-width="1"/>
+  <!-- 推进器 -->
+  <polygon points="26,44 32,48 38,44" fill="#666666" stroke="#000000" stroke-width="2"/>
+  <line x1="28" y1="48" x2="28" y2="52" stroke="#999999" stroke-width="1"/>
+  <line x1="32" y1="48" x2="32" y2="54" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="36" y1="48" x2="36" y2="52" stroke="#999999" stroke-width="1"/>
+  <!-- 等级标记 -->
+  <text x="32" y="36" font-size="8" text-anchor="middle" fill="#333333" font-weight="bold">III</text>
+</svg>
+
