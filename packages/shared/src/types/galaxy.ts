@@ -2,6 +2,12 @@
  * 星系和天体类型定义
  */
 
+// 星系常量配置
+export const GALAXY_CONSTANTS = {
+    SIDE_LENGTH: 30, // 单个星系的边长（gu）
+    MAX_RADIUS: 11.25, // 最大轨道半径（SIDE_LENGTH * 0.75 / 2）
+} as const;
+
 // 天体类型
 export enum CelestialType {
     STAR = 'star',                    // 恒星

@@ -17,18 +17,53 @@
             <div class="info-panel">
                 <div v-if="hoveredGalaxy" class="galaxy-info">
                     <h4>{{ hoveredGalaxy.name }}</h4>
-                    <p>类型: {{ getCenterBodyType(hoveredGalaxy) }}</p>
-                    <p>天体: {{ hoveredGalaxy.bodies.length }}</p>
+                    <p>{{ getCenterBodyType(hoveredGalaxy) }}</p>
                 </div>
                 <div v-else class="galaxy-info-empty">
-                    将鼠标悬停在星系上查看详情
+                    将鼠标悬停在星系上查看描述
                 </div>
+            </div>
+        </div>
+
+        <!-- 星系详情面板 -->
+        <div v-if="selectedGalaxy" class="galaxy-detail-panel">
+            <div class="detail-header">
+                <h3>{{ selectedGalaxy.name }}</h3>
+                <button @click="selectedGalaxy = null" class="close-btn">
+                    ×
+                </button>
+            </div>
+            <div class="detail-content">
+                <div class="detail-item">
+                    <span class="detail-label">类型:</span>
+                    <span class="detail-value">{{
+                        getCenterBodyType(selectedGalaxy)
+                    }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">天体数量:</span>
+                    <span class="detail-value">{{
+                        selectedGalaxy.bodies.length
+                    }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">坐标:</span>
+                    <span class="detail-value">
+                        ({{ Math.round(selectedGalaxy.position.x) }},
+                        {{ Math.round(selectedGalaxy.position.y) }})
+                    </span>
+                </div>
+            </div>
+            <div class="detail-actions">
+                <button @click="enterGalaxy(selectedGalaxy)" class="enter-btn">
+                    进入星系 →
+                </button>
             </div>
         </div>
 
         <div v-if="loading" class="loading-overlay">
             <div class="loading-spinner"></div>
-            <p>生成星系中...</p>
+            <p>加载中...</p>
         </div>
     </div>
 </template>
@@ -37,7 +72,6 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import {
     Application,
-    Graphics,
     Container,
     Text,
     TextStyle,
@@ -55,19 +89,28 @@ const emit = defineEmits<{
 const mapCanvas = ref<HTMLDivElement | null>(null);
 const loading = ref(false);
 const hoveredGalaxy = ref<Galaxy | null>(null);
+const selectedGalaxy = ref<Galaxy | null>(null);
 
 let app: Application | null = null;
 let viewport: Viewport | null = null;
 let assetsLoaded = false;
 
+// 拖动检测（用于防止拖动时触发点击）
+let isViewportDragging = false;
+
+// 双击检测
+let lastClickTime = 0;
+let lastClickedGalaxyId: string | null = null;
+const DOUBLE_CLICK_DELAY = 300; // 毫秒
+
 // 无限宇宙管理
 let galaxyNodes = new Map<string, Container>();
 let galaxiesData = new Map<string, Galaxy>();
-let connectionsLayer: Container | null = null;
 let galaxiesLayer: Container | null = null;
-const VIEW_PADDING = 800; // 视口外扩距离
+const VIEW_PADDING = 1500; // 视口外扩距离（增加以实现更好的预加载）
 let lastViewportBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
 let updateDebounceTimer: number | null = null;
+let isLoadingInBackground = false; // 后台加载标志
 
 onMounted(async () => {
     await initializeMap();
@@ -117,10 +160,24 @@ async function initializeMap() {
             maxScale: 3.0,
         });
 
+        // 添加viewport拖动检测
+        viewport.on("drag-start", () => {
+            isViewportDragging = true;
+            // 拖动开始时立即触发一次加载，确保预加载足够的内容
+            immediateUpdateVisibleGalaxies();
+        });
+
+        viewport.on("drag-end", () => {
+            // 延迟重置，确保pointerdown事件能检测到拖动状态
+            setTimeout(() => {
+                isViewportDragging = false;
+            }, 50);
+            // 拖动结束后再次加载，确保新区域的星系都已加载
+            immediateUpdateVisibleGalaxies();
+        });
+
         // 创建图层
-        connectionsLayer = new Container();
         galaxiesLayer = new Container();
-        viewport.addChild(connectionsLayer);
         viewport.addChild(galaxiesLayer);
 
         // 设置初始视图（居中在(2000, 2000)）
@@ -189,15 +246,30 @@ function debounceUpdateVisibleGalaxies() {
         clearTimeout(updateDebounceTimer);
     }
     updateDebounceTimer = window.setTimeout(() => {
-        updateVisibleGalaxies();
-    }, 200);
+        updateVisibleGalaxies(true); // 后台加载，不显示遮罩
+    }, 100); // 减少延迟以实现更即时的响应
+}
+
+/**
+ * 立即更新可见星系（用于拖动开始时）
+ */
+function immediateUpdateVisibleGalaxies() {
+    if (updateDebounceTimer !== null) {
+        clearTimeout(updateDebounceTimer);
+        updateDebounceTimer = null;
+    }
+    updateVisibleGalaxies(true); // 后台加载
 }
 
 /**
  * 更新可见星系（从服务器动态加载）
+ * @param backgroundLoad 是否在后台加载（不显示加载遮罩）
  */
-async function updateVisibleGalaxies() {
-    if (!viewport || !galaxiesLayer || !connectionsLayer) return;
+async function updateVisibleGalaxies(backgroundLoad = false) {
+    if (!viewport || !galaxiesLayer) return;
+
+    // 如果正在后台加载，跳过此次请求
+    if (isLoadingInBackground) return;
 
     const bounds = viewport.getVisibleBounds();
 
@@ -209,10 +281,10 @@ async function updateVisibleGalaxies() {
 
     // 检查是否需要加载新数据（避免重复加载）
     if (
-        Math.abs(minX - lastViewportBounds.minX) < VIEW_PADDING / 2 &&
-        Math.abs(maxX - lastViewportBounds.maxX) < VIEW_PADDING / 2 &&
-        Math.abs(minY - lastViewportBounds.minY) < VIEW_PADDING / 2 &&
-        Math.abs(maxY - lastViewportBounds.maxY) < VIEW_PADDING / 2
+        Math.abs(minX - lastViewportBounds.minX) < VIEW_PADDING / 3 &&
+        Math.abs(maxX - lastViewportBounds.maxX) < VIEW_PADDING / 3 &&
+        Math.abs(minY - lastViewportBounds.minY) < VIEW_PADDING / 3 &&
+        Math.abs(maxY - lastViewportBounds.maxY) < VIEW_PADDING / 3
     ) {
         // 视口变化不大，不需要重新加载
         return;
@@ -221,7 +293,12 @@ async function updateVisibleGalaxies() {
     lastViewportBounds = { minX, maxX, minY, maxY };
 
     try {
-        loading.value = true;
+        // 只在非后台加载时显示遮罩
+        if (!backgroundLoad) {
+            loading.value = true;
+        } else {
+            isLoadingInBackground = true;
+        }
 
         // 从服务器加载该区域的星系
         const response = await getGalaxiesInRegion(minX, maxX, minY, maxY);
@@ -234,8 +311,10 @@ async function updateVisibleGalaxies() {
                 galaxiesData.set(galaxy.id, galaxy);
             });
 
-            // 确定当前视口内应该显示的星系
+            // 确定当前视口内应该显示的星系（包含缓冲区）
             const visibleGalaxyIds = new Set<string>();
+            const removalBuffer = VIEW_PADDING * 0.5; // 额外缓冲区，避免频繁添加/删除
+
             galaxiesData.forEach((galaxy, id) => {
                 if (
                     galaxy.position.x >= minX &&
@@ -247,17 +326,41 @@ async function updateVisibleGalaxies() {
                 }
             });
 
-            // 移除不在视口内的星系节点
+            // 移除远离视口的星系节点（使用更大的缓冲区）
             galaxyNodes.forEach((node, id) => {
-                if (!visibleGalaxyIds.has(id)) {
-                    galaxiesLayer!.removeChild(node);
-                    galaxyNodes.delete(id);
+                const galaxy = galaxiesData.get(id);
+                if (galaxy) {
+                    const isInRemovalZone =
+                        galaxy.position.x < minX - removalBuffer ||
+                        galaxy.position.x > maxX + removalBuffer ||
+                        galaxy.position.y < minY - removalBuffer ||
+                        galaxy.position.y > maxY + removalBuffer;
+
+                    if (isInRemovalZone) {
+                        galaxiesLayer!.removeChild(node);
+                        galaxyNodes.delete(id);
+                    }
                 }
             });
 
-            // 添加新进入视口的星系节点
-            visibleGalaxyIds.forEach((id) => {
-                if (!galaxyNodes.has(id)) {
+            // 批量添加新进入视口的星系节点（使用requestAnimationFrame优化）
+            const newGalaxyIds = Array.from(visibleGalaxyIds).filter(
+                (id) => !galaxyNodes.has(id)
+            );
+
+            // 分批添加，避免一次性添加太多导致卡顿
+            const batchSize = 20;
+            let currentIndex = 0;
+
+            const addBatch = () => {
+                const end = Math.min(
+                    currentIndex + batchSize,
+                    newGalaxyIds.length
+                );
+
+                for (let i = currentIndex; i < end; i++) {
+                    const id = newGalaxyIds[i];
+                    if (!id) continue;
                     const galaxy = galaxiesData.get(id);
                     if (galaxy) {
                         const node = createGalaxyNode(galaxy);
@@ -265,71 +368,26 @@ async function updateVisibleGalaxies() {
                         galaxyNodes.set(id, node);
                     }
                 }
-            });
 
-            // 重绘连接线
-            redrawConnections(Array.from(visibleGalaxyIds));
+                currentIndex = end;
+
+                if (currentIndex < newGalaxyIds.length) {
+                    requestAnimationFrame(addBatch);
+                }
+            };
+
+            if (newGalaxyIds.length > 0) {
+                requestAnimationFrame(addBatch);
+            }
         }
 
         loading.value = false;
+        isLoadingInBackground = false;
     } catch (error) {
         console.error("加载区域星系失败:", error);
         loading.value = false;
+        isLoadingInBackground = false;
     }
-}
-
-/**
- * 重绘连接线（基于距离的简单连接）
- */
-function redrawConnections(visibleGalaxyIds: string[]) {
-    if (!connectionsLayer) return;
-
-    connectionsLayer.removeChildren();
-
-    const visibleGalaxies = visibleGalaxyIds
-        .map((id) => galaxiesData.get(id))
-        .filter((g) => g !== undefined) as Galaxy[];
-
-    const drawnPairs = new Set<string>();
-
-    // 为每个星系连接最近的1-2个星系
-    visibleGalaxies.forEach((galaxy) => {
-        const distances = visibleGalaxies
-            .filter((other) => other.id !== galaxy.id)
-            .map((other) => ({
-                galaxy: other,
-                distance: Math.sqrt(
-                    Math.pow(galaxy.position.x - other.position.x, 2) +
-                        Math.pow(galaxy.position.y - other.position.y, 2)
-                ),
-            }))
-            .sort((a, b) => a.distance - b.distance)
-            .slice(0, 2); // 最近的2个
-
-        distances.forEach(({ galaxy: targetGalaxy, distance }) => {
-            if (distance < 300) {
-                // 只连接距离小于300的星系
-                const pairKey = [galaxy.id, targetGalaxy.id].sort().join("_");
-                if (!drawnPairs.has(pairKey)) {
-                    drawnPairs.add(pairKey);
-                    drawConnection(galaxy, targetGalaxy);
-                }
-            }
-        });
-    });
-}
-
-/**
- * 绘制两个星系之间的连接线
- */
-function drawConnection(from: Galaxy, to: Galaxy) {
-    if (!connectionsLayer) return;
-
-    const line = new Graphics();
-    line.moveTo(from.position.x, from.position.y);
-    line.lineTo(to.position.x, to.position.y);
-    line.stroke({ width: 2, color: 0x666666, alpha: 1 });
-    connectionsLayer.addChild(line);
 }
 
 function getGalaxyIconPath(type: GalaxyType): string {
@@ -397,10 +455,37 @@ function createGalaxyNode(galaxy: Galaxy): Container {
     // ================================================
 
     container.on("pointerdown", () => {
-        emit("galaxyClick", galaxy);
+        // 如果正在拖动viewport，则不处理点击
+        if (isViewportDragging) return;
+
+        const now = Date.now();
+        const timeSinceLastClick = now - lastClickTime;
+
+        // 双击检测
+        if (
+            lastClickedGalaxyId === galaxy.id &&
+            timeSinceLastClick < DOUBLE_CLICK_DELAY
+        ) {
+            // 双击：直接进入星系
+            enterGalaxy(galaxy);
+            lastClickedGalaxyId = null;
+            lastClickTime = 0;
+        } else {
+            // 单击：显示详情面板
+            selectedGalaxy.value = galaxy;
+            lastClickedGalaxyId = galaxy.id;
+            lastClickTime = now;
+        }
     });
 
     return container;
+}
+
+/**
+ * 进入星系
+ */
+function enterGalaxy(galaxy: Galaxy) {
+    emit("galaxyClick", galaxy);
 }
 
 function getCenterBodyType(galaxy: Galaxy): string {
@@ -450,7 +535,6 @@ function cleanup() {
     viewport = null;
     galaxyNodes.clear();
     galaxiesData.clear();
-    connectionsLayer = null;
     galaxiesLayer = null;
 }
 </script>
@@ -549,6 +633,121 @@ function cleanup() {
     font-size: 12px;
     text-align: center;
     font-family: "Courier New", monospace;
+}
+
+/* 星系详情面板 */
+.galaxy-detail-panel {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 320px;
+    background: #ffffff;
+    border: 3px solid #000000;
+    border-radius: 0;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.3);
+    z-index: 50;
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50%) translateX(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(-50%) translateX(0);
+        opacity: 1;
+    }
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #000000;
+    border-bottom: 3px solid #000000;
+}
+
+.detail-header h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: "Courier New", monospace;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.1s;
+}
+
+.close-btn:hover {
+    opacity: 0.7;
+}
+
+.detail-content {
+    padding: 20px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eeeeee;
+    font-family: "Courier New", monospace;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #666666;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.detail-value {
+    color: #000000;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.detail-actions {
+    padding: 0 20px 20px 20px;
+}
+
+.enter-btn {
+    width: 100%;
+    padding: 12px;
+    background: #000000;
+    color: #ffffff;
+    border: 2px solid #000000;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: "Courier New", monospace;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.enter-btn:hover {
+    background: #333333;
+    box-shadow: 3px 3px 0 #000000;
+    transform: translate(-1px, -1px);
 }
 
 .loading-overlay {

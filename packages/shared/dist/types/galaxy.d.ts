@@ -1,6 +1,10 @@
 /**
  * 星系和天体类型定义
  */
+export declare const GALAXY_CONSTANTS: {
+    readonly SIDE_LENGTH: 30;
+    readonly MAX_RADIUS: 11.25;
+};
 export declare enum CelestialType {
     STAR = "star",// 恒星
     GAS_GIANT = "gas_giant",// 气态巨星

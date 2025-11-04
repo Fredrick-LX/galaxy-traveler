@@ -3,12 +3,57 @@
         <div class="view-header">
             <button @click="goBack" class="back-btn">← 返回星系地图</button>
             <h2>{{ galaxy?.name || "加载中..." }}</h2>
-            <div class="header-info">
-                <span v-if="galaxy">{{ galaxy.bodies.length }} 个天体</span>
+            <div class="header-controls">
+                <button 
+                    @click="toggleCelestialList" 
+                    class="toggle-btn"
+                    :title="isCelestialListExpanded ? '折叠天体列表' : '展开天体列表'"
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path 
+                            v-if="isCelestialListExpanded"
+                            d="M2 2h12v2H2V2zm0 4h12v2H2V6zm0 4h12v2H2v-2zm0 4h12v2H2v-2z"
+                            fill="currentColor"
+                        />
+                        <path 
+                            v-else
+                            d="M2 6h12v2H2V6zm0 4h12v2H2v-2z"
+                            fill="currentColor"
+                        />
+                    </svg>
+                    <span>天体列表</span>
+                </button>
+                <button 
+                    @click="toggleBuildingMenu" 
+                    class="toggle-btn"
+                    :title="isBuildingMenuExpanded ? '折叠建造菜单' : '展开建造菜单'"
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path 
+                            v-if="isBuildingMenuExpanded"
+                            d="M2 2h12v2H2V2zm0 4h12v2H2V6zm0 4h12v2H2v-2zm0 4h12v2H2v-2z"
+                            fill="currentColor"
+                        />
+                        <path 
+                            v-else
+                            d="M2 6h12v2H2V6zm0 4h12v2H2v-2z"
+                            fill="currentColor"
+                        />
+                    </svg>
+                    <span>建造菜单</span>
+                </button>
+                <span v-if="galaxy" class="header-info">{{ galaxy.bodies.length }} 个天体</span>
             </div>
         </div>
 
         <div ref="viewCanvas" class="view-canvas"></div>
+
+        <!-- 操作提示 -->
+        <div class="control-hints">
+            <div class="hint-item">🖱️ 滚轮：缩放</div>
+            <div class="hint-item">🖱️ 中键拖拽：移动视图</div>
+            <div class="hint-item">🖱️ 左键：选择 / 右键：命令</div>
+        </div>
 
         <!-- 控制面板 -->
         <UnitControlPanel
@@ -19,10 +64,7 @@
         />
 
         <!-- 天体列表（左侧） -->
-        <div class="celestial-list">
-            <div class="panel-header">
-                <h3>天体列表</h3>
-            </div>
+        <div class="celestial-list" :class="{ collapsed: !isCelestialListExpanded }">
             <div class="panel-content">
                 <div
                     class="body-item"
@@ -68,10 +110,7 @@
         </div>
 
         <!-- 建造菜单（右侧） -->
-        <div class="building-menu-panel">
-            <div class="panel-header">
-                <h3>建造菜单</h3>
-            </div>
+        <div class="building-menu-panel" :class="{ collapsed: !isBuildingMenuExpanded }">
             <div class="panel-content">
                 <BuildingMenu @place-building="startBuildingPlacement" />
             </div>
@@ -95,26 +134,26 @@
                 <div class="info-row">
                     <span class="info-label">质量:</span>
                     <span class="info-value">{{
-                        selectedBody.mass.toFixed(2)
-                    }}</span>
+                        selectedBody.mass.toFixed(3)
+                    }} gu</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">半径:</span>
+                    <span class="info-label">{{ getRadiusLabel(selectedBody.type) }}:</span>
                     <span class="info-value"
-                        >{{ selectedBody.radius.toFixed(0) }} km</span
+                        >{{ selectedBody.radius.toFixed(3) }} gu</span
                     >
                 </div>
                 <div v-if="selectedBody.temperature" class="info-row">
-                    <span class="info-label">温度:</span>
+                    <span class="info-label">{{ getTemperatureLabel(selectedBody.type) }}:</span>
                     <span class="info-value"
-                        >{{ selectedBody.temperature.toFixed(0) }} K</span
+                        >{{ selectedBody.temperature.toFixed(3) }} gK</span
                     >
                 </div>
                 <div v-if="selectedBody.orbitRadius" class="info-row">
                     <span class="info-label">轨道半径:</span>
                     <span class="info-value">{{
-                        selectedBody.orbitRadius.toFixed(2)
-                    }}</span>
+                        selectedBody.orbitRadius.toFixed(3)
+                    }} gu</span>
                 </div>
                 <div
                     v-if="
@@ -163,6 +202,7 @@ import type {
     GameShip,
     GameStructure,
 } from "@galaxy-traveler/shared";
+import { GALAXY_CONSTANTS } from "@galaxy-traveler/shared";
 import UnitControlPanel from "./UnitControlPanel.vue";
 import BuildingMenu from "./BuildingMenu.vue";
 
@@ -176,8 +216,8 @@ const emit = defineEmits<{
 }>();
 
 // ==================== 常量配置 ====================
-const WORLD_SIZE = 15; // 世界大小 15x15
-const WORLD_CENTER = WORLD_SIZE / 2; // 世界中心点 7.5
+const WORLD_SIZE = GALAXY_CONSTANTS.SIDE_LENGTH; // 使用统一的星系边长
+const WORLD_CENTER = WORLD_SIZE / 2; // 世界中心点
 const GRID_STEP = 0.5; // 网格间隔
 
 // 天体大小配置
@@ -212,6 +252,13 @@ let assetsLoaded = false;
 const isDraggingSelection = ref(false);
 const selectionStart = ref<{ x: number; y: number } | null>(null);
 const selectionEnd = ref<{ x: number; y: number } | null>(null);
+
+// 拖动检测（用于防止拖动时触发点击）
+let isViewportDragging = false;
+
+// 面板折叠状态（默认折叠）
+const isCelestialListExpanded = ref(false);
+const isBuildingMenuExpanded = ref(false);
 
 // ==================== Computed ====================
 const sortedBodies = computed(() => {
@@ -267,6 +314,11 @@ async function initializeView() {
 
         app.stage.addChild(viewport);
 
+        // 禁用右键菜单
+        viewCanvas.value.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+        });
+
         // 配置 viewport 交互
         setupViewportInteractions();
 
@@ -279,14 +331,19 @@ async function initializeView() {
         // 绘制星系视图
         renderGalaxyView();
 
-        // 居中视图
+        // 居中视图并设置初始缩放
         viewport.moveCenter(WORLD_CENTER, WORLD_CENTER);
-        viewport.setZoom(
-            Math.min(
-                viewCanvas.value.clientWidth,
-                viewCanvas.value.clientHeight
-            ) / WORLD_SIZE
-        );
+        
+        // 计算合适的初始缩放，确保星系在视口中可见且不被侧边栏遮挡
+        // 左侧天体列表宽度340px，右侧建造菜单宽度340px
+        const effectiveWidth = viewCanvas.value.clientWidth - 680; // 减去两侧面板
+        const effectiveHeight = viewCanvas.value.clientHeight - 100; // 减去顶部栏
+        const initialZoom = Math.min(
+            effectiveWidth / WORLD_SIZE,
+            effectiveHeight / WORLD_SIZE
+        ) * 0.8; // 留出20%边距
+        
+        viewport.setZoom(initialZoom);
     } catch (error) {
         console.error("初始化星系视图失败:", error);
     }
@@ -295,15 +352,31 @@ async function initializeView() {
 function setupViewportInteractions() {
     if (!viewport) return;
 
+    // 配置交互功能
     viewport
-        .drag({ mouseButtons: "middle" })
-        .pinch()
-        .wheel()
-        .decelerate()
-        .clamp({ direction: "all" })
+        .drag({
+            mouseButtons: "middle", // 只使用中键拖拽
+            wheel: false, // 禁用拖拽时的滚轮
+        })
+        .pinch() // 支持触摸屏双指缩放
+        .wheel({
+            smooth: 5, // 平滑滚轮缩放
+            percent: 0.1, // 每次缩放10%
+        })
+        .decelerate({
+            friction: 0.9, // 拖拽减速摩擦力
+        })
+        .clamp({
+            underflow: "center", // 当世界小于视口时居中
+            // 允许拖动超出边界5%的距离
+            left: -WORLD_SIZE * 0.05,
+            right: WORLD_SIZE * 1.05,
+            top: -WORLD_SIZE * 0.05,
+            bottom: WORLD_SIZE * 1.05,
+        })
         .clampZoom({
-            minScale: 30.0,
-            maxScale: 30.0,
+            minScale: 15.0, // 最小缩放：可以看到整个星系的15倍范围
+            maxScale: 45.0, // 最大缩放：可以放大45倍查看细节
         });
 
     viewport.eventMode = "static";
@@ -311,6 +384,18 @@ function setupViewportInteractions() {
     viewport.on("pointermove", handlePointerMove);
     viewport.on("pointerup", handlePointerUp);
     viewport.on("rightclick", handleRightClick);
+    
+    // 添加viewport拖动检测
+    viewport.on("drag-start", () => {
+        isViewportDragging = true;
+    });
+    
+    viewport.on("drag-end", () => {
+        // 延迟重置，确保click事件能检测到拖动状态
+        setTimeout(() => {
+            isViewportDragging = false;
+        }, 50);
+    });
 }
 
 // ==================== 资源加载 ====================
@@ -446,7 +531,11 @@ function createBodyNode(body: CelestialBody): Container {
     // 添加交互
     container.eventMode = "static";
     container.cursor = "pointer";
-    container.on("click", () => selectBody(body));
+    container.on("click", () => {
+        // 如果正在拖动viewport，则不处理点击
+        if (isViewportDragging) return;
+        selectBody(body);
+    });
 
     return container;
 }
@@ -512,6 +601,8 @@ function createShip(ship: GameShip): Container {
     container.eventMode = "static";
     container.cursor = "pointer";
     container.on("click", (event) => {
+        // 如果正在拖动viewport，则不处理点击
+        if (isViewportDragging) return;
         event.stopPropagation();
         handleObjectClick(ship.instanceId, event);
     });
@@ -551,6 +642,8 @@ function createStructure(structure: GameStructure): Container {
     container.eventMode = "static";
     container.cursor = "pointer";
     container.on("click", (event) => {
+        // 如果正在拖动viewport，则不处理点击
+        if (isViewportDragging) return;
         event.stopPropagation();
         handleObjectClick(structure.id, event);
     });
@@ -864,6 +957,43 @@ function getCelestialTypeName(type: CelestialType | string): string {
     return names[type] || "未知天体";
 }
 
+function getRadiusLabel(type: CelestialType | string): string {
+    const labels: Record<string, string> = {
+        black_hole: "视界半径",
+        neutron_star: "半径",
+        pulsar: "半径",
+        star: "半径",
+        gas_giant: "赤道半径",
+        ice_giant: "赤道半径",
+        terrestrial: "平均半径",
+        asteroid_belt: "宽度",
+        dwarf_planet: "平均半径",
+    };
+    return labels[type] || "半径";
+}
+
+function getTemperatureLabel(type: CelestialType | string): string {
+    const labels: Record<string, string> = {
+        star: "表面温度",
+        neutron_star: "表面温度",
+        pulsar: "表面温度",
+        gas_giant: "云顶温度",
+        ice_giant: "云顶温度",
+        terrestrial: "表面温度",
+        dwarf_planet: "表面温度",
+    };
+    return labels[type] || "温度";
+}
+
+// ==================== 面板折叠控制 ====================
+function toggleCelestialList() {
+    isCelestialListExpanded.value = !isCelestialListExpanded.value;
+}
+
+function toggleBuildingMenu() {
+    isBuildingMenuExpanded.value = !isBuildingMenuExpanded.value;
+}
+
 // ==================== 清理 ====================
 function cleanup() {
     if (app) {
@@ -898,6 +1028,46 @@ function goBack() {
     padding: 15px 20px;
     background: #ffffff;
     border-bottom: 3px solid #000000;
+}
+
+.view-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #000000;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #ffffff;
+    border: 2px solid #000000;
+    border-radius: 0;
+    color: #000000;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: "Courier New", monospace;
+    transition: all 0.1s;
+}
+
+.toggle-btn:hover {
+    background: #000000;
+    color: #ffffff;
+    box-shadow: 2px 2px 0 #000000;
+    transform: translate(-1px, -1px);
+}
+
+.toggle-btn svg {
+    flex-shrink: 0;
 }
 
 .back-btn {
@@ -939,6 +1109,30 @@ function goBack() {
     width: 100%;
 }
 
+.control-hints {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #000000;
+    border-radius: 0;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.hint-item {
+    color: #000000;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 .celestial-list {
     position: absolute;
     left: 20px;
@@ -950,27 +1144,38 @@ function goBack() {
     border-radius: 0;
     box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
     overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                border-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
 }
 
-.panel-header {
-    padding: 12px 15px;
-    background: #000000;
-    border-bottom: 3px solid #000000;
+.celestial-list.collapsed {
+    width: 0;
+    border-width: 0;
+    box-shadow: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
-.panel-header h3 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: "Courier New", monospace;
-}
-
-.panel-content {
+.celestial-list .panel-content {
     padding: 15px;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: visible !important;
     max-height: calc(100vh - 200px);
+    min-width: 290px;
+}
+
+.celestial-list .body-item:last-child {
+    margin-bottom: 0;
+}
+
+.building-menu-panel .panel-content {
+    padding: 15px;
+    overflow-y: auto;
+    overflow-x: visible !important;
+    max-height: calc(100vh - 200px);
+    min-width: 290px;
 }
 
 .body-item {
@@ -1077,12 +1282,25 @@ function goBack() {
     right: 20px;
     top: 80px;
     width: 320px;
+    height: auto;
     max-height: calc(100% - 100px);
     background: #ffffff;
     border: 3px solid #000000;
     border-radius: 0;
     box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
     overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                border-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+}
+
+.building-menu-panel.collapsed {
+    width: 0;
+    border-width: 0;
+    box-shadow: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .celestial-info-panel {

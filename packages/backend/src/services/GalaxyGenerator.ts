@@ -18,6 +18,7 @@ import {
     Planet,
     AsteroidBelt,
     ExoticCelestial,
+    GALAXY_CONSTANTS,
 } from '@galaxy-traveler/shared';
 
 export class GalaxyGenerator {
@@ -400,27 +401,31 @@ export class GalaxyGenerator {
     }
 
     /**
-     * 生成轨道天体 - 使用阿基米德螺线
+     * 生成轨道天体 - 使用均匀圆环分布
      */
     private generateOrbitalBody(galaxyId: string, index: number, center: Star | ExoticCelestial, rng?: ReturnType<typeof alea>, galaxyType?: GalaxyType): CelestialBody | null {
         const localRng = rng || this.rng;
-        // 阿基米德螺线: r = a + b * θ
-        // 调整起始半径以确保最大轨道至少占星系边长的75%
-        const maxRadius = 30 * 0.75 / 2; // 星系边长30，75%，半径为11.25
-        const maxAngle = Math.PI * 4; // 最多旋转720度(2周)
-        const a = 2;  // 起始半径
-        const b = 1.2;  // 增加每弧度的距离，使螺线更宽
-
-        // 计算角度：每个天体间隔约 π/6 弧度（30度）+ 随机偏移
-        // 限制最大角度为720度
-        let orbitAngle = (index * Math.PI / 6) + (localRng() - 0.5) * 0.5;
-        orbitAngle = Math.min(orbitAngle, maxAngle);
-
-        // 使用阿基米德螺线计算半径，确保不超过最大半径
-        let orbitRadius = a + b * orbitAngle;
-        orbitRadius = Math.min(orbitRadius, maxRadius);
-        orbitRadius = Math.round(orbitRadius);
-
+        
+        // 使用统一的星系常量配置
+        const maxRadius = GALAXY_CONSTANTS.MAX_RADIUS;
+        const minRadius = 2;  // 最小轨道半径
+        
+        // 将轨道空间划分为多个圈层，每个圈层宽度约1.5-2gu
+        const orbitLayerWidth = 1.5 + localRng() * 0.5; // 1.5-2gu
+        const layerIndex = Math.floor(index / 2); // 每个圈层放置2个天体
+        
+        // 计算轨道半径：基础半径 + 圈层偏移 + 随机扰动
+        let orbitRadius = minRadius + layerIndex * orbitLayerWidth;
+        orbitRadius += (localRng() - 0.5) * orbitLayerWidth * 0.4; // 添加±20%随机扰动
+        orbitRadius = Math.min(orbitRadius, maxRadius); // 限制最大半径
+        orbitRadius = Math.max(orbitRadius, minRadius); // 确保不小于最小半径
+        
+        // 在圆环上均匀分布角度，添加随机偏移避免过于规则
+        // 同一圈层的天体尽量均匀分布
+        const angleInLayer = index % 2;
+        const baseAngle = angleInLayer * Math.PI + localRng() * Math.PI * 0.8;
+        const orbitAngle = baseAngle + (localRng() - 0.5) * Math.PI * 0.3; // 添加随机偏移
+        
         const rand = localRng();
 
         // 黑洞系统增加小行星带概率
@@ -462,7 +467,7 @@ export class GalaxyGenerator {
             position: {
                 x: Math.round(Math.cos(orbitAngle) * orbitRadius),
                 y: Math.round(Math.sin(orbitAngle) * orbitRadius),
-                z: (localRng() - 0.5) * 0.2,
+                z: Math.round((localRng() - 0.5) * 0.2 * 100) / 100, // z轴保留2位小数
             },
             mass: 0.5 + localRng() * 1.5, // 质量单位: gu (galaxy unit)
             radius: 0.5 + localRng() * 0.8, // 半径单位: gu
@@ -494,7 +499,7 @@ export class GalaxyGenerator {
             position: {
                 x: Math.round(Math.cos(orbitAngle) * orbitRadius),
                 y: Math.round(Math.sin(orbitAngle) * orbitRadius),
-                z: (localRng() - 0.5) * 0.3,
+                z: Math.round((localRng() - 0.5) * 0.3 * 100) / 100, // z轴保留2位小数
             },
             mass: 10 + localRng() * 50, // 质量单位: gu
             radius: 2 + localRng() * 2, // 半径单位: gu
@@ -525,7 +530,7 @@ export class GalaxyGenerator {
             position: {
                 x: Math.round(Math.cos(orbitAngle) * orbitRadius),
                 y: Math.round(Math.sin(orbitAngle) * orbitRadius),
-                z: (localRng() - 0.5) * 0.3,
+                z: Math.round((localRng() - 0.5) * 0.3 * 100) / 100, // z轴保留2位小数
             },
             mass: 5 + localRng() * 15, // 质量单位: gu
             radius: 1.5 + localRng() * 1.5, // 半径单位: gu
@@ -555,7 +560,7 @@ export class GalaxyGenerator {
             position: {
                 x: Math.round(Math.cos(orbitAngle) * orbitRadius),
                 y: Math.round(Math.sin(orbitAngle) * orbitRadius),
-                z: (localRng() - 0.5) * 0.4,
+                z: Math.round((localRng() - 0.5) * 0.4 * 100) / 100, // z轴保留2位小数
             },
             mass: 0.01 + localRng() * 0.1, // 质量单位: gu
             radius: orbitRadius * 0.3, // 半径单位: gu
