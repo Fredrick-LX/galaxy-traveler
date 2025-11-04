@@ -53,7 +53,7 @@ const router = createRouter({
 });
 
 // 路由守卫
-router.beforeEach((to, _ , next) => {
+router.beforeEach((to, _, next) => {
     const token = localStorage.getItem('auth_token');
     const requiresAuth = to.meta.requiresAuth;
 

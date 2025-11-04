@@ -55,7 +55,7 @@ async function putData<T>(key: string, data: T): Promise<boolean> {
             console.error('尝试插入无效数据:', key);
             return false;
         }
-        
+
         const serializedData = serialize(data);
         await db.put(key, serializedData);
         return true;
@@ -73,12 +73,12 @@ async function putData<T>(key: string, data: T): Promise<boolean> {
 async function getData<T>(key: string): Promise<T | null> {
     try {
         const data = await db.get(key);
-        
+
         // 检查数据是否有效
         if (!data || data === 'undefined' || data === 'null') {
             return null;
         }
-        
+
         return deserialize<T>(data);
     } catch (error: any) {
         // 键不存在时返回 null，不打印错误
@@ -157,7 +157,7 @@ async function initDatabase(): Promise<void> {
             console.log('✅ LevelDB 数据库已经打开');
             return;
         }
-        
+
         await db.open();
         console.log('✅ LevelDB 数据库已初始化');
     } catch (error: any) {
@@ -181,12 +181,12 @@ async function closeDatabase(): Promise<void> {
             console.log('⚠️ 数据库已经关闭或正在关闭');
             return;
         }
-        
+
         if (db.status !== 'open') {
             console.log('⚠️ 数据库未打开，无需关闭');
             return;
         }
-        
+
         await db.close();
         console.log('✅ LevelDB 数据库已关闭');
     } catch (error: any) {

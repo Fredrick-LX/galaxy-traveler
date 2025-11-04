@@ -1,43 +1,43 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { login } from '../api/auth';
-import type { LoginRequest } from '../types/auth';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { login } from "../api/auth";
+import type { LoginRequest } from "../types/auth";
 
 const router = useRouter();
 
 // 表单数据
 const formData = ref<LoginRequest>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
 });
 
 // UI 状态
 const loading = ref(false);
-const errorMessage = ref('');
+const errorMessage = ref("");
 
 /**
  * 处理登录
  */
 async function handleLogin() {
     // 清空错误信息
-    errorMessage.value = '';
+    errorMessage.value = "";
 
     // 验证输入
     if (!formData.value.email.trim()) {
-        errorMessage.value = '请输入邮箱';
+        errorMessage.value = "请输入邮箱";
         return;
     }
 
     // 验证邮箱格式
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.value.email)) {
-        errorMessage.value = '邮箱格式不正确';
+        errorMessage.value = "邮箱格式不正确";
         return;
     }
 
     if (!formData.value.password) {
-        errorMessage.value = '请输入密码';
+        errorMessage.value = "请输入密码";
         return;
     }
 
@@ -48,16 +48,16 @@ async function handleLogin() {
 
         if (result.success && result.token && result.user) {
             // 保存 token 和用户信息
-            localStorage.setItem('auth_token', result.token);
-            localStorage.setItem('user_info', JSON.stringify(result.user));
+            localStorage.setItem("auth_token", result.token);
+            localStorage.setItem("user_info", JSON.stringify(result.user));
 
             // 跳转到主页
-            router.push('/');
+            router.push("/");
         } else {
             errorMessage.value = result.message;
         }
     } catch (error) {
-        errorMessage.value = '登录失败，请稍后重试';
+        errorMessage.value = "登录失败，请稍后重试";
     } finally {
         loading.value = false;
     }
@@ -67,14 +67,14 @@ async function handleLogin() {
  * 跳转到注册页面
  */
 function goToRegister() {
-    router.push('/register');
+    router.push("/register");
 }
 
 /**
  * 跳转到找回密码页面
  */
 function goToForgotPassword() {
-    router.push('/forgot-password');
+    router.push("/forgot-password");
 }
 </script>
 
@@ -118,12 +118,16 @@ function goToForgotPassword() {
                 </div>
 
                 <button type="submit" class="submit-button" :disabled="loading">
-                    {{ loading ? '登录中...' : '登录' }}
+                    {{ loading ? "登录中..." : "登录" }}
                 </button>
             </form>
 
             <div class="login-footer">
-                <button type="button" class="link-button" @click="goToForgotPassword">
+                <button
+                    type="button"
+                    class="link-button"
+                    @click="goToForgotPassword"
+                >
                     忘记密码？
                 </button>
                 <span class="divider">|</span>
@@ -141,12 +145,12 @@ function goToForgotPassword() {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #EEEEEE;
+    background: #eeeeee;
     padding: 20px;
 }
 
 .login-card {
-    background: #FFFFFF;
+    background: #ffffff;
     border: 3px solid #000000;
     border-radius: 0;
     box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
@@ -198,10 +202,10 @@ function goToForgotPassword() {
     width: 100%;
     padding: 12px;
     font-size: 14px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     border: 2px solid #333333;
     border-radius: 0;
-    background: #FFFFFF;
+    background: #ffffff;
     color: #000000;
     transition: all 0.1s;
     box-sizing: border-box;
@@ -210,17 +214,17 @@ function goToForgotPassword() {
 .form-input:focus {
     outline: none;
     border-color: #000000;
-    box-shadow: 0 0 0 2px #CCCCCC;
+    box-shadow: 0 0 0 2px #cccccc;
 }
 
 .form-input:disabled {
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
     color: #999999;
     cursor: not-allowed;
 }
 
 .error-message {
-    background-color: #EEEEEE;
+    background-color: #eeeeee;
     color: #000000;
     border: 2px solid #000000;
     padding: 12px;
@@ -234,8 +238,8 @@ function goToForgotPassword() {
     padding: 14px;
     font-size: 14px;
     font-weight: 700;
-    font-family: 'Courier New', Courier, monospace;
-    color: #FFFFFF;
+    font-family: "Courier New", Courier, monospace;
+    color: #ffffff;
     background: #000000;
     border: 2px solid #000000;
     border-radius: 0;
@@ -246,7 +250,7 @@ function goToForgotPassword() {
 }
 
 .submit-button:hover:not(:disabled) {
-    background: #FFFFFF;
+    background: #ffffff;
     color: #000000;
     box-shadow: 4px 4px 0 #000000;
     transform: translate(-2px, -2px);
@@ -260,7 +264,7 @@ function goToForgotPassword() {
 .submit-button:disabled {
     background: #666666;
     border-color: #666666;
-    color: #CCCCCC;
+    color: #cccccc;
     cursor: not-allowed;
 }
 
@@ -279,7 +283,7 @@ function goToForgotPassword() {
     border: none;
     color: #000000;
     font-size: 12px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     cursor: pointer;
     transition: all 0.1s;
     padding: 0;
@@ -295,4 +299,3 @@ function goToForgotPassword() {
     font-weight: 700;
 }
 </style>
-

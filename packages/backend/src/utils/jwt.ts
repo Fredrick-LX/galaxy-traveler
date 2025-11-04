@@ -26,7 +26,7 @@ export function verifyToken(token: string): JwtPayload | null {
         if (!token || token.trim() === '' || token === 'undefined' || token === 'null') {
             return null;
         }
-        
+
         const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
         return decoded;
     } catch (error) {

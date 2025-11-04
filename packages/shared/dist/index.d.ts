@@ -4,6 +4,5 @@
 export * from './types/ships.js';
 export * from './types/buildings.js';
 export * from './types/resources.js';
-export * from './types/gameApi.js';
 export * from './types/gameObjects.js';
 export * from './types/galaxy.js';

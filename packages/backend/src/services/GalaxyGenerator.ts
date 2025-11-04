@@ -5,740 +5,707 @@
 
 import { createNoise3D } from 'simplex-noise';
 import alea from 'alea';
+import { calculateDistance } from '@/utils/helpers';
 import {
-  Galaxy,
-  GalaxyNetwork,
-  GalaxyGenerationConfig,
-  GalaxyType,
-  CelestialBody,
-  CelestialType,
-  Star,
-  StarType,
-  Planet,
-  AsteroidBelt,
-  ExoticCelestial,
+    Galaxy,
+    GalaxyNetwork,
+    GalaxyGenerationConfig,
+    GalaxyType,
+    CelestialBody,
+    CelestialType,
+    Star,
+    StarType,
+    Planet,
+    AsteroidBelt,
+    ExoticCelestial,
 } from '@galaxy-traveler/shared';
 
 export class GalaxyGenerator {
-  private noise3D: ReturnType<typeof createNoise3D>;
-  private rng: ReturnType<typeof alea>;
-  private seed: number;
+    private noise3D: ReturnType<typeof createNoise3D>;
+    private rng: ReturnType<typeof alea>;
+    private seed: number;
 
-  constructor(seed?: number) {
-    this.seed = seed || Date.now();
-    this.rng = alea(this.seed);
-    this.noise3D = createNoise3D(this.rng);
-  }
+    constructor(seed?: number) {
+        this.seed = seed || Date.now();
+        this.rng = alea(this.seed);
+        this.noise3D = createNoise3D(this.rng);
+    }
 
-  /**
-   * 为指定坐标创建一个确定性的RNG
-   */
-  private createLocalRng(x: number, y: number): ReturnType<typeof alea> {
-    // 使用主种子和坐标创建确定性种子
-    const localSeed = this.seed + x * 73856093 + y * 19349663;
-    return alea(localSeed);
-  }
+    /**
+     * 为指定坐标创建一个确定性的RNG
+     */
+    private createLocalRng(x: number, y: number): ReturnType<typeof alea> {
+        // 使用主种子和坐标创建确定性种子
+        const localSeed = this.seed + x * 73856093 + y * 19349663;
+        return alea(localSeed);
+    }
 
-  /**
-   * 生成指定区域内的星系
-   * @param minX 区域最小X坐标
-   * @param maxX 区域最大X坐标
-   * @param minY 区域最小Y坐标
-   * @param maxY 区域最大Y坐标
-   * @param density 星系密度（每100x100单位的星系数量）
-   */
-  generateGalaxiesInRegion(
-    minX: number,
-    maxX: number,
-    minY: number,
-    maxY: number,
-    density: number = 0.8
-  ): Galaxy[] {
-    const galaxies: Galaxy[] = [];
-    const gridSize = 150; // 网格大小
-    
-    // 计算覆盖该区域的所有网格
-    const startGridX = Math.floor(minX / gridSize);
-    const endGridX = Math.ceil(maxX / gridSize);
-    const startGridY = Math.floor(minY / gridSize);
-    const endGridY = Math.ceil(maxY / gridSize);
+    /**
+     * 生成指定区域内的星系
+     * @param minX 区域最小X坐标
+     * @param maxX 区域最大X坐标
+     * @param minY 区域最小Y坐标
+     * @param maxY 区域最大Y坐标
+     * @param density 星系密度（每100x100单位的星系数量）
+     */
+    generateGalaxiesInRegion(
+        minX: number,
+        maxX: number,
+        minY: number,
+        maxY: number,
+        density: number = 0.8
+    ): Galaxy[] {
+        const galaxies: Galaxy[] = [];
+        const gridSize = 150; // 网格大小
 
-    // 遍历每个网格
-    for (let gridX = startGridX; gridX <= endGridX; gridX++) {
-      for (let gridY = startGridY; gridY <= endGridY; gridY++) {
-        // 为这个网格创建确定性RNG
-        const localRng = this.createLocalRng(gridX, gridY);
-        
-        // 使用噪声决定这个网格是否有星系
-        const noiseValue = this.noise3D(gridX * 0.1, gridY * 0.1, 0);
-        const hasGalaxy = (noiseValue + 1) / 2 < density;
-        
-        if (hasGalaxy) {
-          // 在网格内生成星系位置（确定性）
-          const offsetX = localRng() * gridSize;
-          const offsetY = localRng() * gridSize;
-          const x = gridX * gridSize + offsetX;
-          const y = gridY * gridSize + offsetY;
-          const z = (localRng() - 0.5) * 50;
+        // 计算覆盖该区域的所有网格
+        const startGridX = Math.floor(minX / gridSize);
+        const endGridX = Math.ceil(maxX / gridSize);
+        const startGridY = Math.floor(minY / gridSize);
+        const endGridY = Math.ceil(maxY / gridSize);
 
-          // 生成星系ID（基于网格坐标）
-          const id = `galaxy_${gridX}_${gridY}`;
-          
-          // 检查是否在请求的区域内
-          if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-            const galaxy = this.generateGalaxyAtPosition(
-              id,
-              { x, y, z },
-              gridX,
-              gridY,
-              false
-            );
-            galaxies.push(galaxy);
-          }
+        // 遍历每个网格
+        for (let gridX = startGridX; gridX <= endGridX; gridX++) {
+            for (let gridY = startGridY; gridY <= endGridY; gridY++) {
+                // 为这个网格创建确定性RNG
+                const localRng = this.createLocalRng(gridX, gridY);
+
+                // 使用噪声决定这个网格是否有星系
+                const noiseValue = this.noise3D(gridX * 0.1, gridY * 0.1, 0);
+                const hasGalaxy = (noiseValue + 1) / 2 < density;
+
+                if (hasGalaxy) {
+                    // 在网格内生成星系位置（确定性）
+                    const offsetX = localRng() * gridSize;
+                    const offsetY = localRng() * gridSize;
+                    const x = gridX * gridSize + offsetX;
+                    const y = gridY * gridSize + offsetY;
+                    const z = (localRng() - 0.5) * 50;
+
+                    // 生成星系ID（基于网格坐标）
+                    const id = `galaxy_${gridX}_${gridY}`;
+
+                    // 检查是否在请求的区域内
+                    if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+                        const galaxy = this.generateGalaxyAtPosition(
+                            id,
+                            { x, y, z },
+                            gridX,
+                            gridY,
+                            false
+                        );
+                        galaxies.push(galaxy);
+                    }
+                }
+            }
         }
-      }
+
+        return galaxies;
     }
 
-    return galaxies;
-  }
+    /**
+     * 在指定位置生成单个星系（使用位置确定性种子）
+     */
+    private generateGalaxyAtPosition(
+        id: string,
+        position: { x: number; y: number; z: number },
+        gridX: number,
+        gridY: number,
+        isStarting: boolean
+    ): Galaxy {
+        // 创建该位置的确定性RNG
+        const localRng = this.createLocalRng(gridX, gridY);
+        const noise = this.noise3D(position.x * 0.01, position.y * 0.01, position.z * 0.01);
 
-  /**
-   * 在指定位置生成单个星系（使用位置确定性种子）
-   */
-  private generateGalaxyAtPosition(
-    id: string,
-    position: { x: number; y: number; z: number },
-    gridX: number,
-    gridY: number,
-    isStarting: boolean
-  ): Galaxy {
-    // 创建该位置的确定性RNG
-    const localRng = this.createLocalRng(gridX, gridY);
-    const noise = this.noise3D(position.x * 0.01, position.y * 0.01, position.z * 0.01);
-    
-    // 使用本地RNG生成星系
-    return this.generateGalaxyWithRng(id, position, noise, localRng, isStarting);
-  }
+        // 使用本地RNG生成星系
+        const rand = localRng();
 
-  /**
-   * 使用指定的RNG生成星系
-   */
-  private generateGalaxyWithRng(
-    id: string,
-    position: { x: number; y: number; z: number },
-    noise: number,
-    localRng: ReturnType<typeof alea>,
-    isStarting: boolean
-  ): Galaxy {
-    const rand = localRng();
-    
-    // 决定星系类型
-    let galaxyType: GalaxyType;
-    let centerBodies: (Star | ExoticCelestial)[] = [];
-    
-    if (rand < 0.02) {
-      galaxyType = GalaxyType.BLACK_HOLE;
-      centerBodies.push(this.generateBlackHoleWithRng(id, localRng));
-    } else if (rand < 0.04) {
-      galaxyType = GalaxyType.NEUTRON_STAR;
-      centerBodies.push(this.generateNeutronStarWithRng(id, localRng));
-    } else if (rand < 0.05) {
-      galaxyType = GalaxyType.PULSAR;
-      centerBodies.push(this.generatePulsarWithRng(id, localRng));
-    } else if (rand < 0.20) {
-      galaxyType = GalaxyType.BINARY_STAR;
-      centerBodies.push(this.generateStarWithRng(`${id}_star_a`, noise, localRng));
-      centerBodies.push(this.generateStarWithRng(`${id}_star_b`, noise + 0.5, localRng));
-    } else if (rand < 0.25) {
-      galaxyType = GalaxyType.TRIPLE_STAR;
-      centerBodies.push(this.generateStarWithRng(`${id}_star_a`, noise, localRng));
-      centerBodies.push(this.generateStarWithRng(`${id}_star_b`, noise + 0.3, localRng));
-      centerBodies.push(this.generateStarWithRng(`${id}_star_c`, noise + 0.6, localRng));
-    } else {
-      galaxyType = GalaxyType.SINGLE_STAR;
-      centerBodies.push(this.generateStarWithRng(id, noise, localRng));
-    }
-    
-    const centerBody = centerBodies[0];
-    const bodies: CelestialBody[] = [...centerBodies];
+        // 决定星系类型
+        let galaxyType: GalaxyType;
+        let centerBodies: (Star | ExoticCelestial)[] = [];
 
-    // 生成围绕中心的天体
-    const bodyCount = Math.floor(3 + localRng() * 8);
-    for (let i = 0; i < bodyCount; i++) {
-      const body = this.generateOrbitalBodyWithRng(id, i, centerBody, localRng);
-      if (body) {
-        bodies.push(body);
-      }
-    }
+        if (rand < 0.02) {
+            galaxyType = GalaxyType.BLACK_HOLE;
+            centerBodies.push(this.generateBlackHole(id, localRng));
+        } else if (rand < 0.04) {
+            galaxyType = GalaxyType.NEUTRON_STAR;
+            centerBodies.push(this.generateNeutronStar(id, localRng));
+        } else if (rand < 0.05) {
+            galaxyType = GalaxyType.PULSAR;
+            centerBodies.push(this.generatePulsar(id, localRng));
+        } else if (rand < 0.20) {
+            galaxyType = GalaxyType.BINARY_STAR;
+            centerBodies.push(this.generateStar(`${id}_star_a`, noise, localRng));
+            centerBodies.push(this.generateStar(`${id}_star_b`, noise + 0.5, localRng));
+            // 调整双星位置，使它们在中心附近分布
+            centerBodies[0].position = { x: -1, y: 0, z: 0 };
+            centerBodies[1].position = { x: 1, y: 0, z: 0 };
+        } else if (rand < 0.25) {
+            galaxyType = GalaxyType.TRIPLE_STAR;
+            centerBodies.push(this.generateStar(`${id}_star_a`, noise, localRng));
+            centerBodies.push(this.generateStar(`${id}_star_b`, noise + 0.3, localRng));
+            centerBodies.push(this.generateStar(`${id}_star_c`, noise + 0.6, localRng));
+            // 调整三星位置，形成三角形分布
+            centerBodies[0].position = { x: 0, y: -1.2, z: 0 };
+            centerBodies[1].position = { x: -1, y: 0.6, z: 0 };
+            centerBodies[2].position = { x: 1, y: 0.6, z: 0 };
+        } else {
+            galaxyType = GalaxyType.SINGLE_STAR;
+            centerBodies.push(this.generateStar(id, noise, localRng));
+        }
 
-    return {
-      id,
-      name: this.generateGalaxyNameWithRng(id, localRng),
-      type: galaxyType,
-      position,
-      centerBody,
-      centerBodies: centerBodies.length > 1 ? centerBodies : undefined,
-      bodies,
-      connections: [],
-      controlled: isStarting ? 'player_start' : undefined,
-    };
-  }
+        const centerBody = centerBodies[0];
+        const bodies: CelestialBody[] = [...centerBodies];
 
-  /**
-   * 生成星系网络
-   */
-  generateGalaxyNetwork(config: GalaxyGenerationConfig): GalaxyNetwork {
-    const galaxies = new Map<string, Galaxy>();
-    const connections = new Map<string, string[]>();
+        // 根据星系类型和中心天体数量决定天体数量
+        let bodyCount: number;
+        if (galaxyType === GalaxyType.NEUTRON_STAR || galaxyType === GalaxyType.PULSAR) {
+            // 中子星和脉冲星系统天体较少
+            bodyCount = Math.floor(2 + localRng() * 4); // 2-5个天体
+        } else if (galaxyType === GalaxyType.BLACK_HOLE) {
+            // 黑洞系统天体数量适中
+            bodyCount = Math.floor(3 + localRng() * 5); // 3-7个天体
+        } else if (galaxyType === GalaxyType.TRIPLE_STAR) {
+            // 三星系统天体较少（中心天体多）
+            bodyCount = Math.floor(4 + localRng() * 5); // 4-8个天体
+        } else if (galaxyType === GalaxyType.BINARY_STAR) {
+            // 双星系统天体适中
+            bodyCount = Math.floor(5 + localRng() * 6); // 5-10个天体
+        } else {
+            // 单星系统天体最多
+            bodyCount = Math.floor(6 + localRng() * 8); // 6-13个天体
+        }
 
-    // 1. 生成星系位置（稀疏拓扑）
-    const positions = this.generateGalaxyPositions(config);
+        // 生成围绕中心的天体
+        for (let i = 0; i < bodyCount; i++) {
+            const body = this.generateOrbitalBody(id, i, centerBody, localRng, galaxyType);
+            if (body) {
+                bodies.push(body);
+            }
+        }
 
-    // 2. 为每个位置创建星系
-    positions.forEach((pos, index) => {
-      const galaxy = this.generateGalaxy(
-        `galaxy_${index}`,
-        pos,
-        index === 0 // 第一个星系为玩家起始点
-      );
-      galaxies.set(galaxy.id, galaxy);
-      connections.set(galaxy.id, []);
-    });
-
-    // 3. 建立星系间连接
-    this.createGalaxyConnections(galaxies, connections, config);
-
-    console.log(`✨ 生成了 ${galaxies.size} 个星系`);
-
-    return {
-      galaxies,
-      connections,
-      seed: this.seed,
-    };
-  }
-
-  /**
-   * 生成星系位置（稀疏分布）
-   */
-  private generateGalaxyPositions(config: GalaxyGenerationConfig): Array<{ x: number; y: number; z: number }> {
-    const positions: Array<{ x: number; y: number; z: number }> = [];
-    const { galaxyCount, minDistance } = config;
-    const gridSize = Math.ceil(Math.sqrt(galaxyCount)) * 2;
-    const cellSize = minDistance * 1.5;
-
-    for (let i = 0; i < galaxyCount; i++) {
-      let attempts = 0;
-      let validPosition = false;
-      let pos = { x: 0, y: 0, z: 0 };
-
-      while (!validPosition && attempts < 100) {
-        // 使用噪声生成位置
-        const angle = this.rng() * Math.PI * 2;
-        const radius = this.rng() * gridSize * cellSize;
-        const height = (this.rng() - 0.5) * cellSize * 0.5;
-
-        pos = {
-          x: Math.cos(angle) * radius,
-          y: Math.sin(angle) * radius,
-          z: height,
+        return {
+            id,
+            name: this.generateGalaxyName(id, localRng),
+            type: galaxyType,
+            position,
+            centerBody,
+            centerBodies: centerBodies.length > 1 ? centerBodies : undefined,
+            bodies,
+            connections: [],
+            controlled: isStarting ? 'player_start' : undefined,
         };
+    }
 
-        // 检查与其他星系的距离
-        validPosition = positions.every(existingPos => {
-          const dx = pos.x - existingPos.x;
-          const dy = pos.y - existingPos.y;
-          const dz = pos.z - existingPos.z;
-          const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-          return distance >= minDistance;
+    /**
+     * 生成星系网络
+     */
+    generateGalaxyNetwork(config: GalaxyGenerationConfig): GalaxyNetwork {
+        const galaxies = new Map<string, Galaxy>();
+        const connections = new Map<string, string[]>();
+
+        // 1. 生成星系位置（稀疏拓扑）
+        const positions = this.generateGalaxyPositions(config);
+
+        // 2. 为每个位置创建星系
+        positions.forEach((pos, index) => {
+            const galaxy = this.generateGalaxy(
+                `galaxy_${index}`,
+                pos,
+                index === 0 // 第一个星系为玩家起始点
+            );
+            galaxies.set(galaxy.id, galaxy);
+            connections.set(galaxy.id, []);
         });
 
-        attempts++;
-      }
+        // 3. 建立星系间连接
+        this.createGalaxyConnections(galaxies, connections, config);
 
-      if (validPosition) {
-        positions.push(pos);
-      }
+        console.log(`✨ 生成了 ${galaxies.size} 个星系`);
+
+        return {
+            galaxies,
+            connections,
+            seed: this.seed,
+        };
     }
 
-    return positions;
-  }
+    /**
+     * 生成星系位置（稀疏分布）
+     */
+    private generateGalaxyPositions(config: GalaxyGenerationConfig): Array<{ x: number; y: number; z: number }> {
+        const positions: Array<{ x: number; y: number; z: number }> = [];
+        const { galaxyCount, minDistance } = config;
+        const gridSize = Math.ceil(Math.sqrt(galaxyCount)) * 2;
+        const cellSize = minDistance * 1.5;
 
-  /**
-   * 生成单个星系
-   */
-  private generateGalaxy(
-    id: string,
-    position: { x: number; y: number; z: number },
-    isStarting: boolean
-  ): Galaxy {
-    const noise = this.noise3D(position.x * 0.01, position.y * 0.01, position.z * 0.01);
-    const rand = this.rng();
-    
-    // 决定星系类型
-    let galaxyType: GalaxyType;
-    let centerBodies: (Star | ExoticCelestial)[] = [];
-    
-    if (rand < 0.02) {
-      galaxyType = GalaxyType.BLACK_HOLE;
-      centerBodies.push(this.generateBlackHole(id));
-    } else if (rand < 0.04) {
-      galaxyType = GalaxyType.NEUTRON_STAR;
-      centerBodies.push(this.generateNeutronStar(id));
-    } else if (rand < 0.05) {
-      galaxyType = GalaxyType.PULSAR;
-      centerBodies.push(this.generatePulsar(id));
-    } else if (rand < 0.20) {
-      // 15% 概率双星系统
-      galaxyType = GalaxyType.BINARY_STAR;
-      centerBodies.push(this.generateStar(`${id}_star_a`, noise));
-      centerBodies.push(this.generateStar(`${id}_star_b`, noise + 0.5));
-    } else if (rand < 0.25) {
-      // 5% 概率三星系统
-      galaxyType = GalaxyType.TRIPLE_STAR;
-      centerBodies.push(this.generateStar(`${id}_star_a`, noise));
-      centerBodies.push(this.generateStar(`${id}_star_b`, noise + 0.3));
-      centerBodies.push(this.generateStar(`${id}_star_c`, noise + 0.6));
-    } else {
-      // 单星系统
-      galaxyType = GalaxyType.SINGLE_STAR;
-      centerBodies.push(this.generateStar(id, noise));
-    }
-    
-    const centerBody = centerBodies[0];
-    const bodies: CelestialBody[] = [...centerBodies];
+        for (let i = 0; i < galaxyCount; i++) {
+            let attempts = 0;
+            let validPosition = false;
+            let pos = { x: 0, y: 0, z: 0 };
 
-    // 生成围绕中心的天体
-    const bodyCount = Math.floor(3 + this.rng() * 8); // 3-10个天体
-    for (let i = 0; i < bodyCount; i++) {
-      const body = this.generateOrbitalBody(id, i, centerBody);
-      if (body) {
-        bodies.push(body);
-      }
-    }
+            while (!validPosition && attempts < 100) {
+                // 使用噪声生成位置
+                const angle = this.rng() * Math.PI * 2;
+                const radius = this.rng() * gridSize * cellSize;
+                const height = (this.rng() - 0.5) * cellSize * 0.5;
 
-    return {
-      id,
-      name: this.generateGalaxyName(id),
-      type: galaxyType,
-      position,
-      centerBody,
-      centerBodies: centerBodies.length > 1 ? centerBodies : undefined,
-      bodies,
-      connections: [],
-      controlled: isStarting ? 'player_start' : undefined,
-    };
-  }
+                pos = {
+                    x: Math.cos(angle) * radius,
+                    y: Math.sin(angle) * radius,
+                    z: height,
+                };
 
+                // 检查与其他星系的距离
+                validPosition = positions.every(existingPos => {
+                    const dx = pos.x - existingPos.x;
+                    const dy = pos.y - existingPos.y;
+                    const dz = pos.z - existingPos.z;
+                    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    return distance >= minDistance;
+                });
 
-  /**
-   * 生成恒星（使用指定RNG）
-   */
-  private generateStarWithRng(galaxyId: string, noise: number, rng: ReturnType<typeof alea>): Star {
-    const starTypes = [
-      { type: StarType.M_TYPE, prob: 0.7, temp: 3000, radius: 0.3, lum: 0.04 },
-      { type: StarType.K_TYPE, prob: 0.85, temp: 4500, radius: 0.7, lum: 0.3 },
-      { type: StarType.G_TYPE, prob: 0.92, temp: 5800, radius: 1.0, lum: 1.0 },
-      { type: StarType.F_TYPE, prob: 0.96, temp: 7000, radius: 1.3, lum: 2.5 },
-      { type: StarType.A_TYPE, prob: 0.98, temp: 9000, radius: 1.7, lum: 8.0 },
-      { type: StarType.B_TYPE, prob: 0.995, temp: 15000, radius: 4.0, lum: 100 },
-      { type: StarType.O_TYPE, prob: 1.0, temp: 30000, radius: 10.0, lum: 1000 },
-    ];
-
-    const rand = rng();
-    const starType = starTypes.find(st => rand < st.prob) || starTypes[0];
-
-    return {
-      id: `${galaxyId}_star`,
-      name: `${this.generateStarNameWithRng(rng)}`,
-      type: CelestialType.STAR,
-      starType: starType.type,
-      position: { x: 0, y: 0, z: 0 },
-      mass: starType.radius * starType.radius * 1000,
-      radius: starType.radius * 696340,
-      temperature: starType.temp,
-      luminosity: starType.lum,
-    };
-  }
-
-  /**
-   * 生成恒星
-   */
-  private generateStar(galaxyId: string, noise: number): Star {
-    return this.generateStarWithRng(galaxyId, noise, this.rng);
-  }
-
-  /**
-   * 生成轨道天体（使用指定RNG）
-   */
-  private generateOrbitalBodyWithRng(galaxyId: string, index: number, center: Star | ExoticCelestial, rng: ReturnType<typeof alea>): CelestialBody | null {
-    const orbitRadius = Math.round(3 + index * 1.5 + rng() * 2);
-    const orbitAngle = rng() * Math.PI * 2;
-    const rand = rng();
-
-    if (rand < 0.1) {
-      return this.generateAsteroidBeltWithRng(galaxyId, index, orbitRadius, orbitAngle, rng);
-    } else if (orbitRadius < 8) {
-      return this.generateTerrestrialPlanetWithRng(galaxyId, index, orbitRadius, orbitAngle, rng);
-    } else if (orbitRadius < 15) {
-      return rand < 0.6 
-        ? this.generateGasGiantWithRng(galaxyId, index, orbitRadius, orbitAngle, rng)
-        : this.generateTerrestrialPlanetWithRng(galaxyId, index, orbitRadius, orbitAngle, rng);
-    } else {
-      return this.generateIceGiantWithRng(galaxyId, index, orbitRadius, orbitAngle, rng);
-    }
-  }
-
-  /**
-   * 生成轨道天体
-   */
-  private generateOrbitalBody(galaxyId: string, index: number, center: Star | ExoticCelestial): CelestialBody | null {
-    return this.generateOrbitalBodyWithRng(galaxyId, index, center, this.rng);
-  }
-
-  /**
-   * 生成类地行星（使用指定RNG）
-   */
-  private generateTerrestrialPlanetWithRng(
-    galaxyId: string,
-    index: number,
-    orbitRadius: number,
-    orbitAngle: number,
-    rng: ReturnType<typeof alea>
-  ): Planet {
-    const resources = this.selectPlanetResourcesWithRng(['iron_ore', 'copper_ore', 'titanium_ore', 'silicon_crystal'], rng);
-
-    return {
-      id: `${galaxyId}_planet_${index}`,
-      name: `${this.generatePlanetNameWithRng(rng)} ${index + 1}`,
-      type: CelestialType.TERRESTRIAL,
-      position: {
-        x: Math.cos(orbitAngle) * orbitRadius,
-        y: Math.sin(orbitAngle) * orbitRadius,
-        z: (rng() - 0.5) * 0.2,
-      },
-      mass: 0.5 + rng() * 1.5,
-      radius: 3000 + rng() * 4000,
-      temperature: 200 + rng() * 300,
-      orbitRadius,
-      orbitAngle,
-      atmosphere: rng() > 0.5 ? ['nitrogen', 'oxygen', 'co2'] : undefined,
-      resources,
-    };
-  }
-
-  /**
-   * 生成类地行星
-   */
-  private generateTerrestrialPlanet(
-    galaxyId: string,
-    index: number,
-    orbitRadius: number,
-    orbitAngle: number
-  ): Planet {
-    return this.generateTerrestrialPlanetWithRng(galaxyId, index, orbitRadius, orbitAngle, this.rng);
-  }
-
-  /**
-   * 生成气态巨星（使用指定RNG）
-   */
-  private generateGasGiantWithRng(
-    galaxyId: string,
-    index: number,
-    orbitRadius: number,
-    orbitAngle: number,
-    rng: ReturnType<typeof alea>
-  ): Planet {
-    const resources = this.selectPlanetResourcesWithRng(['hydrogen_gas', 'helium_gas'], rng);
-
-    return {
-      id: `${galaxyId}_gas_giant_${index}`,
-      name: `${this.generatePlanetNameWithRng(rng)} ${index + 1}`,
-      type: CelestialType.GAS_GIANT,
-      position: {
-        x: Math.cos(orbitAngle) * orbitRadius,
-        y: Math.sin(orbitAngle) * orbitRadius,
-        z: (rng() - 0.5) * 0.3,
-      },
-      mass: 10 + rng() * 100,
-      radius: 40000 + rng() * 30000,
-      temperature: 100 + rng() * 150,
-      orbitRadius,
-      orbitAngle,
-      hasRings: rng() > 0.5,
-      atmosphere: ['hydrogen', 'helium'],
-      resources,
-    };
-  }
-
-  /**
-   * 生成气态巨星
-   */
-  private generateGasGiant(
-    galaxyId: string,
-    index: number,
-    orbitRadius: number,
-    orbitAngle: number
-  ): Planet {
-    return this.generateGasGiantWithRng(galaxyId, index, orbitRadius, orbitAngle, this.rng);
-  }
-
-  /**
-   * 生成冰巨星（使用指定RNG）
-   */
-  private generateIceGiantWithRng(
-    galaxyId: string,
-    index: number,
-    orbitRadius: number,
-    orbitAngle: number,
-    rng: ReturnType<typeof alea>
-  ): Planet {
-    return {
-      id: `${galaxyId}_ice_giant_${index}`,
-      name: `${this.generatePlanetNameWithRng(rng)} ${index + 1}`,
-      type: CelestialType.ICE_GIANT,
-      position: {
-        x: Math.cos(orbitAngle) * orbitRadius,
-        y: Math.sin(orbitAngle) * orbitRadius,
-        z: (rng() - 0.5) * 0.3,
-      },
-      mass: 5 + rng() * 20,
-      radius: 20000 + rng() * 25000,
-      temperature: 50 + rng() * 100,
-      orbitRadius,
-      orbitAngle,
-      atmosphere: ['methane', 'ammonia', 'water'],
-      resources: this.selectPlanetResourcesWithRng(['water', 'nitrogen_gas'], rng),
-    };
-  }
-
-  /**
-   * 生成冰巨星
-   */
-  private generateIceGiant(
-    galaxyId: string,
-    index: number,
-    orbitRadius: number,
-    orbitAngle: number
-  ): Planet {
-    return this.generateIceGiantWithRng(galaxyId, index, orbitRadius, orbitAngle, this.rng);
-  }
-
-  /**
-   * 生成小行星带（使用指定RNG）
-   */
-  private generateAsteroidBeltWithRng(
-    galaxyId: string,
-    index: number,
-    orbitRadius: number,
-    orbitAngle: number,
-    rng: ReturnType<typeof alea>
-  ): AsteroidBelt {
-    return {
-      id: `${galaxyId}_belt_${index}`,
-      name: `Asteroid Belt ${index + 1}`,
-      type: CelestialType.ASTEROID_BELT,
-      position: {
-        x: Math.cos(orbitAngle) * orbitRadius,
-        y: Math.sin(orbitAngle) * orbitRadius,
-        z: (rng() - 0.5) * 0.4,
-      },
-      mass: 0.01 + rng() * 0.1,
-      radius: orbitRadius * 0.3,
-      orbitRadius,
-      orbitAngle,
-      density: rng(),
-      asteroidCount: Math.floor(1000 + rng() * 5000),
-      resources: this.selectPlanetResourcesWithRng(['iron_ore', 'rare_metal_ore', 'titanium_ore'], rng),
-    };
-  }
-
-  /**
-   * 生成小行星带
-   */
-  private generateAsteroidBelt(
-    galaxyId: string,
-    index: number,
-    orbitRadius: number,
-    orbitAngle: number
-  ): AsteroidBelt {
-    return this.generateAsteroidBeltWithRng(galaxyId, index, orbitRadius, orbitAngle, this.rng);
-  }
-
-  /**
-   * 生成黑洞（使用指定RNG）
-   */
-  private generateBlackHoleWithRng(galaxyId: string, rng: ReturnType<typeof alea>): ExoticCelestial {
-    return {
-      id: `${galaxyId}_blackhole`,
-      name: 'Black Hole',
-      type: CelestialType.BLACK_HOLE,
-      position: { x: 0, y: 0, z: 0 },
-      mass: 10000 + rng() * 50000,
-      radius: 10 + rng() * 100,
-      rotationSpeed: rng() * 1000,
-    };
-  }
-
-  /**
-   * 生成黑洞
-   */
-  private generateBlackHole(galaxyId: string): ExoticCelestial {
-    return this.generateBlackHoleWithRng(galaxyId, this.rng);
-  }
-
-  /**
-   * 生成中子星（使用指定RNG）
-   */
-  private generateNeutronStarWithRng(galaxyId: string, rng: ReturnType<typeof alea>): ExoticCelestial {
-    return {
-      id: `${galaxyId}_neutron`,
-      name: 'Neutron Star',
-      type: CelestialType.NEUTRON_STAR,
-      position: { x: 0, y: 0, z: 0 },
-      mass: 2000 + rng() * 1000,
-      radius: 10 + rng() * 5,
-      temperature: 600000,
-      magneticField: rng() * 1e14,
-    };
-  }
-
-  /**
-   * 生成中子星
-   */
-  private generateNeutronStar(galaxyId: string): ExoticCelestial {
-    return this.generateNeutronStarWithRng(galaxyId, this.rng);
-  }
-
-  /**
-   * 生成脉冲星（使用指定RNG）
-   */
-  private generatePulsarWithRng(galaxyId: string, rng: ReturnType<typeof alea>): ExoticCelestial {
-    return {
-      id: `${galaxyId}_pulsar`,
-      name: 'Pulsar',
-      type: CelestialType.PULSAR,
-      position: { x: 0, y: 0, z: 0 },
-      mass: 2000 + rng() * 1000,
-      radius: 10 + rng() * 5,
-      temperature: 600000,
-      rotationSpeed: 100 + rng() * 900,
-      magneticField: rng() * 1e15,
-    };
-  }
-
-  /**
-   * 生成脉冲星
-   */
-  private generatePulsar(galaxyId: string): ExoticCelestial {
-    return this.generatePulsarWithRng(galaxyId, this.rng);
-  }
-
-  /**
-   * 建立星系间连接
-   */
-  private createGalaxyConnections(
-    galaxies: Map<string, Galaxy>,
-    connections: Map<string, string[]>,
-    config: GalaxyGenerationConfig
-  ): void {
-    const galaxyArray = Array.from(galaxies.values());
-
-    for (let i = 0; i < galaxyArray.length; i++) {
-      const galaxy = galaxyArray[i];
-      const connList = connections.get(galaxy.id)!;
-
-      // 查找最近的几个星系
-      const distances = galaxyArray
-        .map((other, idx) => ({ galaxy: other, idx, distance: this.calculateDistance(galaxy.position, other.position) }))
-        .filter(d => d.idx !== i)
-        .sort((a, b) => a.distance - b.distance);
-
-      // 至少连接最近的1-2个星系
-      const minConnections = 1 + Math.floor(this.rng() * 2);
-      for (let j = 0; j < Math.min(minConnections, distances.length); j++) {
-        const target = distances[j].galaxy;
-        if (!connList.includes(target.id)) {
-          connList.push(target.id);
-          galaxy.connections.push(target.id);
-          
-          // 双向连接
-          const targetConnList = connections.get(target.id)!;
-          if (!targetConnList.includes(galaxy.id)) {
-            targetConnList.push(galaxy.id);
-            target.connections.push(galaxy.id);
-          }
-        }
-      }
-
-      // 额外的随机连接
-      for (let j = minConnections; j < distances.length && j < 5; j++) {
-        if (this.rng() < config.connectionProbability) {
-          const target = distances[j].galaxy;
-          if (!connList.includes(target.id)) {
-            connList.push(target.id);
-            galaxy.connections.push(target.id);
-            
-            const targetConnList = connections.get(target.id)!;
-            if (!targetConnList.includes(galaxy.id)) {
-              targetConnList.push(galaxy.id);
-              target.connections.push(galaxy.id);
+                attempts++;
             }
-          }
+
+            if (validPosition) {
+                positions.push(pos);
+            }
         }
-      }
+
+        return positions;
     }
-  }
 
-  private calculateDistance(pos1: { x: number; y: number; z: number }, pos2: { x: number; y: number; z: number }): number {
-    const dx = pos1.x - pos2.x;
-    const dy = pos1.y - pos2.y;
-    const dz = pos1.z - pos2.z;
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
-  }
+    /**
+     * 生成单个星系
+     */
+    public generateGalaxy(
+        id: string,
+        position: { x: number; y: number; z: number },
+        isStarting: boolean
+    ): Galaxy {
+        const noise = this.noise3D(position.x * 0.01, position.y * 0.01, position.z * 0.01);
+        const rand = this.rng();
 
-  private selectPlanetResourcesWithRng(available: string[], rng: ReturnType<typeof alea>): string[] {
-    const count = 1 + Math.floor(rng() * 3);
-    const selected: string[] = [];
-    for (let i = 0; i < count && selected.length < available.length; i++) {
-      const idx = Math.floor(rng() * available.length);
-      if (!selected.includes(available[idx])) {
-        selected.push(available[idx]);
-      }
+        // 决定星系类型
+        let galaxyType: GalaxyType;
+        let centerBodies: (Star | ExoticCelestial)[] = [];
+
+        if (rand < 0.02) {
+            galaxyType = GalaxyType.BLACK_HOLE;
+            centerBodies.push(this.generateBlackHole(id));
+        } else if (rand < 0.04) {
+            galaxyType = GalaxyType.NEUTRON_STAR;
+            centerBodies.push(this.generateNeutronStar(id));
+        } else if (rand < 0.05) {
+            galaxyType = GalaxyType.PULSAR;
+            centerBodies.push(this.generatePulsar(id));
+        } else if (rand < 0.20) {
+            // 15% 概率双星系统
+            galaxyType = GalaxyType.BINARY_STAR;
+            centerBodies.push(this.generateStar(`${id}_star_a`, noise));
+            centerBodies.push(this.generateStar(`${id}_star_b`, noise + 0.5));
+            // 调整双星位置，使它们在中心附近分布
+            centerBodies[0].position = { x: -1, y: 0, z: 0 };
+            centerBodies[1].position = { x: 1, y: 0, z: 0 };
+        } else if (rand < 0.25) {
+            // 5% 概率三星系统
+            galaxyType = GalaxyType.TRIPLE_STAR;
+            centerBodies.push(this.generateStar(`${id}_star_a`, noise));
+            centerBodies.push(this.generateStar(`${id}_star_b`, noise + 0.3));
+            centerBodies.push(this.generateStar(`${id}_star_c`, noise + 0.6));
+            // 调整三星位置，形成三角形分布
+            centerBodies[0].position = { x: 0, y: -1.2, z: 0 };
+            centerBodies[1].position = { x: -1, y: 0.6, z: 0 };
+            centerBodies[2].position = { x: 1, y: 0.6, z: 0 };
+        } else {
+            // 单星系统
+            galaxyType = GalaxyType.SINGLE_STAR;
+            centerBodies.push(this.generateStar(id, noise));
+        }
+
+        const centerBody = centerBodies[0];
+        const bodies: CelestialBody[] = [...centerBodies];
+
+        // 根据星系类型和中心天体数量决定天体数量
+        let bodyCount: number;
+        if (galaxyType === GalaxyType.NEUTRON_STAR || galaxyType === GalaxyType.PULSAR) {
+            // 中子星和脉冲星系统天体较少
+            bodyCount = Math.floor(2 + this.rng() * 4); // 2-5个天体
+        } else if (galaxyType === GalaxyType.BLACK_HOLE) {
+            // 黑洞系统天体数量适中
+            bodyCount = Math.floor(3 + this.rng() * 5); // 3-7个天体
+        } else if (galaxyType === GalaxyType.TRIPLE_STAR) {
+            // 三星系统天体较少（中心天体多）
+            bodyCount = Math.floor(4 + this.rng() * 5); // 4-8个天体
+        } else if (galaxyType === GalaxyType.BINARY_STAR) {
+            // 双星系统天体适中
+            bodyCount = Math.floor(5 + this.rng() * 6); // 5-10个天体
+        } else {
+            // 单星系统天体最多
+            bodyCount = Math.floor(6 + this.rng() * 8); // 6-13个天体
+        }
+
+        // 生成围绕中心的天体
+        for (let i = 0; i < bodyCount; i++) {
+            const body = this.generateOrbitalBody(id, i, centerBody);
+            if (body) {
+                bodies.push(body);
+            }
+        }
+
+        return {
+            id,
+            name: this.generateGalaxyName(id),
+            type: galaxyType,
+            position,
+            centerBody,
+            centerBodies: centerBodies.length > 1 ? centerBodies : undefined,
+            bodies,
+            connections: [],
+            controlled: isStarting ? 'player_start' : undefined,
+        };
     }
-    return selected;
-  }
 
-  private selectPlanetResources(available: string[]): string[] {
-    return this.selectPlanetResourcesWithRng(available, this.rng);
-  }
 
-  private generateGalaxyNameWithRng(id: string, rng: ReturnType<typeof alea>): string {
-    const prefixes = ['NGC', 'M', 'IC', 'UGC', 'PGC'];
-    const prefix = prefixes[Math.floor(rng() * prefixes.length)];
-    const number = Math.floor(rng() * 10000);
-    return `${prefix} ${number}`;
-  }
+    /**
+     * 生成恒星
+     */
+    private generateStar(galaxyId: string, noise: number, rng?: ReturnType<typeof alea>): Star {
+        const localRng = rng || this.rng;
+        const starTypes = [
+            { type: StarType.M_TYPE, prob: 0.7, temp: 3000, radius: 0.3, lum: 0.04 },
+            { type: StarType.K_TYPE, prob: 0.85, temp: 4500, radius: 0.7, lum: 0.3 },
+            { type: StarType.G_TYPE, prob: 0.92, temp: 5800, radius: 1.0, lum: 1.0 },
+            { type: StarType.F_TYPE, prob: 0.96, temp: 7000, radius: 1.3, lum: 2.5 },
+            { type: StarType.A_TYPE, prob: 0.98, temp: 9000, radius: 1.7, lum: 8.0 },
+            { type: StarType.B_TYPE, prob: 0.995, temp: 15000, radius: 4.0, lum: 100 },
+            { type: StarType.O_TYPE, prob: 1.0, temp: 30000, radius: 10.0, lum: 1000 },
+        ];
 
-  private generateGalaxyName(id: string): string {
-    return this.generateGalaxyNameWithRng(id, this.rng);
-  }
+        const rand = localRng();
+        const starType = starTypes.find(st => rand < st.prob) || starTypes[0];
 
-  private generateStarNameWithRng(rng: ReturnType<typeof alea>): string {
-    const prefixes = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta'];
-    const suffixes = ['Centauri', 'Orionis', 'Cygni', 'Lyrae', 'Aquilae', 'Persei'];
-    return `${prefixes[Math.floor(rng() * prefixes.length)]} ${suffixes[Math.floor(rng() * suffixes.length)]}`;
-  }
+        return {
+            id: `${galaxyId}_star`,
+            name: `${this.generateStarName(localRng)}`,
+            type: CelestialType.STAR,
+            starType: starType.type,
+            position: { x: 0, y: 0, z: 0 },
+            mass: starType.radius * starType.radius * 100, // 质量单位: gu
+            radius: starType.radius * 10, // 半径单位: gu (简化为10倍关系)
+            temperature: starType.temp, // 温度单位: gK
+            luminosity: starType.lum, // 光度单位: gL (galaxy luminosity)
+        };
+    }
 
-  private generateStarName(): string {
-    return this.generateStarNameWithRng(this.rng);
-  }
+    /**
+     * 生成轨道天体 - 使用阿基米德螺线
+     */
+    private generateOrbitalBody(galaxyId: string, index: number, center: Star | ExoticCelestial, rng?: ReturnType<typeof alea>, galaxyType?: GalaxyType): CelestialBody | null {
+        const localRng = rng || this.rng;
+        // 阿基米德螺线: r = a + b * θ
+        // 调整起始半径以确保最大轨道至少占星系边长的75%
+        const maxRadius = 30 * 0.75 / 2; // 星系边长30，75%，半径为11.25
+        const maxAngle = Math.PI * 4; // 最多旋转720度(2周)
+        const a = 2;  // 起始半径
+        const b = 1.2;  // 增加每弧度的距离，使螺线更宽
 
-  private generatePlanetNameWithRng(rng: ReturnType<typeof alea>): string {
-    const names = ['Proxima', 'Terra', 'Nova', 'Prime', 'Kepler', 'Gliese', 'TRAPPIST'];
-    return names[Math.floor(rng() * names.length)];
-  }
+        // 计算角度：每个天体间隔约 π/6 弧度（30度）+ 随机偏移
+        // 限制最大角度为720度
+        let orbitAngle = (index * Math.PI / 6) + (localRng() - 0.5) * 0.5;
+        orbitAngle = Math.min(orbitAngle, maxAngle);
 
-  private generatePlanetName(): string {
-    return this.generatePlanetNameWithRng(this.rng);
-  }
+        // 使用阿基米德螺线计算半径，确保不超过最大半径
+        let orbitRadius = a + b * orbitAngle;
+        orbitRadius = Math.min(orbitRadius, maxRadius);
+        orbitRadius = Math.round(orbitRadius);
+
+        const rand = localRng();
+
+        // 黑洞系统增加小行星带概率
+        const asteroidProb = galaxyType === GalaxyType.BLACK_HOLE ? 0.25 : 0.1;
+
+        if (rand < asteroidProb) {
+            return this.generateAsteroidBelt(galaxyId, index, orbitRadius, orbitAngle, localRng);
+        } else if (orbitRadius < 5) {
+            // 内层区域：类地行星
+            return this.generateTerrestrialPlanet(galaxyId, index, orbitRadius, orbitAngle, localRng);
+        } else if (orbitRadius < 9) {
+            // 中层区域：气态巨星和类地行星混合
+            return rand < 0.6
+                ? this.generateGasGiant(galaxyId, index, orbitRadius, orbitAngle, localRng)
+                : this.generateTerrestrialPlanet(galaxyId, index, orbitRadius, orbitAngle, localRng);
+        } else {
+            // 外层区域：冰巨星
+            return this.generateIceGiant(galaxyId, index, orbitRadius, orbitAngle, localRng);
+        }
+    }
+
+    /**
+     * 生成类地行星
+     */
+    private generateTerrestrialPlanet(
+        galaxyId: string,
+        index: number,
+        orbitRadius: number,
+        orbitAngle: number,
+        rng?: ReturnType<typeof alea>
+    ): Planet {
+        const localRng = rng || this.rng;
+        const resources = this.selectPlanetResources(['iron_ore', 'copper_ore', 'titanium_ore', 'silicon_crystal'], localRng);
+
+        return {
+            id: `${galaxyId}_planet_${index}`,
+            name: `${this.generatePlanetName(localRng)} ${index + 1}`,
+            type: CelestialType.TERRESTRIAL,
+            position: {
+                x: Math.round(Math.cos(orbitAngle) * orbitRadius),
+                y: Math.round(Math.sin(orbitAngle) * orbitRadius),
+                z: (localRng() - 0.5) * 0.2,
+            },
+            mass: 0.5 + localRng() * 1.5, // 质量单位: gu (galaxy unit)
+            radius: 0.5 + localRng() * 0.8, // 半径单位: gu
+            temperature: 200 + localRng() * 300, // 温度单位: gK (galaxy Kelvin)
+            orbitRadius,
+            orbitAngle,
+            atmosphere: localRng() > 0.5 ? ['nitrogen', 'oxygen', 'co2'] : undefined,
+            resources,
+        };
+    }
+
+    /**
+     * 生成气态巨星
+     */
+    private generateGasGiant(
+        galaxyId: string,
+        index: number,
+        orbitRadius: number,
+        orbitAngle: number,
+        rng?: ReturnType<typeof alea>
+    ): Planet {
+        const localRng = rng || this.rng;
+        const resources = this.selectPlanetResources(['hydrogen_gas', 'helium_gas'], localRng);
+
+        return {
+            id: `${galaxyId}_gas_giant_${index}`,
+            name: `${this.generatePlanetName(localRng)} ${index + 1}`,
+            type: CelestialType.GAS_GIANT,
+            position: {
+                x: Math.round(Math.cos(orbitAngle) * orbitRadius),
+                y: Math.round(Math.sin(orbitAngle) * orbitRadius),
+                z: (localRng() - 0.5) * 0.3,
+            },
+            mass: 10 + localRng() * 50, // 质量单位: gu
+            radius: 2 + localRng() * 2, // 半径单位: gu
+            temperature: 100 + localRng() * 150, // 温度单位: gK
+            orbitRadius,
+            orbitAngle,
+            hasRings: localRng() > 0.5,
+            atmosphere: ['hydrogen', 'helium'],
+            resources,
+        };
+    }
+
+    /**
+     * 生成冰巨星
+     */
+    private generateIceGiant(
+        galaxyId: string,
+        index: number,
+        orbitRadius: number,
+        orbitAngle: number,
+        rng?: ReturnType<typeof alea>
+    ): Planet {
+        const localRng = rng || this.rng;
+        return {
+            id: `${galaxyId}_ice_giant_${index}`,
+            name: `${this.generatePlanetName(localRng)} ${index + 1}`,
+            type: CelestialType.ICE_GIANT,
+            position: {
+                x: Math.round(Math.cos(orbitAngle) * orbitRadius),
+                y: Math.round(Math.sin(orbitAngle) * orbitRadius),
+                z: (localRng() - 0.5) * 0.3,
+            },
+            mass: 5 + localRng() * 15, // 质量单位: gu
+            radius: 1.5 + localRng() * 1.5, // 半径单位: gu
+            temperature: 50 + localRng() * 100, // 温度单位: gK
+            orbitRadius,
+            orbitAngle,
+            atmosphere: ['methane', 'ammonia', 'water'],
+            resources: this.selectPlanetResources(['water', 'nitrogen_gas'], localRng),
+        };
+    }
+
+    /**
+     * 生成小行星带
+     */
+    private generateAsteroidBelt(
+        galaxyId: string,
+        index: number,
+        orbitRadius: number,
+        orbitAngle: number,
+        rng?: ReturnType<typeof alea>
+    ): AsteroidBelt {
+        const localRng = rng || this.rng;
+        return {
+            id: `${galaxyId}_belt_${index}`,
+            name: `Asteroid Belt ${index + 1}`,
+            type: CelestialType.ASTEROID_BELT,
+            position: {
+                x: Math.round(Math.cos(orbitAngle) * orbitRadius),
+                y: Math.round(Math.sin(orbitAngle) * orbitRadius),
+                z: (localRng() - 0.5) * 0.4,
+            },
+            mass: 0.01 + localRng() * 0.1, // 质量单位: gu
+            radius: orbitRadius * 0.3, // 半径单位: gu
+            orbitRadius,
+            orbitAngle,
+            density: localRng(),
+            asteroidCount: Math.floor(1000 + localRng() * 5000),
+            resources: this.selectPlanetResources(['iron_ore', 'rare_metal_ore', 'titanium_ore'], localRng),
+        };
+    }
+
+    /**
+     * 生成黑洞
+     */
+    private generateBlackHole(galaxyId: string, rng?: ReturnType<typeof alea>): ExoticCelestial {
+        const localRng = rng || this.rng;
+        return {
+            id: `${galaxyId}_blackhole`,
+            name: 'Black Hole',
+            type: CelestialType.BLACK_HOLE,
+            position: { x: 0, y: 0, z: 0 },
+            mass: 1000 + localRng() * 5000, // 质量单位: gu
+            radius: 0.1 + localRng() * 0.5, // 半径单位: gu
+            rotationSpeed: localRng() * 1000, // 旋转速度单位: gu/s
+        };
+    }
+
+    /**
+     * 生成中子星
+     */
+    private generateNeutronStar(galaxyId: string, rng?: ReturnType<typeof alea>): ExoticCelestial {
+        const localRng = rng || this.rng;
+        return {
+            id: `${galaxyId}_neutron`,
+            name: 'Neutron Star',
+            type: CelestialType.NEUTRON_STAR,
+            position: { x: 0, y: 0, z: 0 },
+            mass: 200 + localRng() * 100, // 质量单位: gu
+            radius: 0.02 + localRng() * 0.01, // 半径单位: gu
+            temperature: 600000, // 温度单位: gK
+            magneticField: localRng() * 1000, // 磁场强度单位: gT (galaxy Tesla)
+        };
+    }
+
+    /**
+     * 生成脉冲星
+     */
+    private generatePulsar(galaxyId: string, rng?: ReturnType<typeof alea>): ExoticCelestial {
+        const localRng = rng || this.rng;
+        return {
+            id: `${galaxyId}_pulsar`,
+            name: 'Pulsar',
+            type: CelestialType.PULSAR,
+            position: { x: 0, y: 0, z: 0 },
+            mass: 200 + localRng() * 100, // 质量单位: gu
+            radius: 0.02 + localRng() * 0.01, // 半径单位: gu
+            temperature: 600000, // 温度单位: gK
+            rotationSpeed: 100 + localRng() * 900, // 旋转速度单位: gu/s
+            magneticField: localRng() * 10000, // 磁场强度单位: gT
+        };
+    }
+
+    /**
+     * 建立星系间连接
+     */
+    private createGalaxyConnections(
+        galaxies: Map<string, Galaxy>,
+        connections: Map<string, string[]>,
+        config: GalaxyGenerationConfig
+    ): void {
+        const galaxyArray = Array.from(galaxies.values());
+
+        for (let i = 0; i < galaxyArray.length; i++) {
+            const galaxy = galaxyArray[i];
+            const connList = connections.get(galaxy.id)!;
+
+            // 查找最近的几个星系
+                const distances = galaxyArray
+                .map((other, idx) => ({ galaxy: other, idx, distance: calculateDistance(galaxy.position, other.position) }))
+                .filter(d => d.idx !== i)
+                .sort((a, b) => a.distance - b.distance);
+
+            // 至少连接最近的1-2个星系
+            const minConnections = 1 + Math.floor(this.rng() * 2);
+            for (let j = 0; j < Math.min(minConnections, distances.length); j++) {
+                const target = distances[j].galaxy;
+                if (!connList.includes(target.id)) {
+                    connList.push(target.id);
+                    galaxy.connections.push(target.id);
+
+                    // 双向连接
+                    const targetConnList = connections.get(target.id)!;
+                    if (!targetConnList.includes(galaxy.id)) {
+                        targetConnList.push(galaxy.id);
+                        target.connections.push(galaxy.id);
+                    }
+                }
+            }
+
+            // 额外的随机连接
+            for (let j = minConnections; j < distances.length && j < 5; j++) {
+                if (this.rng() < config.connectionProbability) {
+                    const target = distances[j].galaxy;
+                    if (!connList.includes(target.id)) {
+                        connList.push(target.id);
+                        galaxy.connections.push(target.id);
+
+                        const targetConnList = connections.get(target.id)!;
+                        if (!targetConnList.includes(galaxy.id)) {
+                            targetConnList.push(galaxy.id);
+                            target.connections.push(galaxy.id);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private selectPlanetResources(available: string[], rng?: ReturnType<typeof alea>): string[] {
+        const localRng = rng || this.rng;
+        const count = 1 + Math.floor(localRng() * 3);
+        const selected: string[] = [];
+        for (let i = 0; i < count && selected.length < available.length; i++) {
+            const idx = Math.floor(localRng() * available.length);
+            if (!selected.includes(available[idx])) {
+                selected.push(available[idx]);
+            }
+        }
+        return selected;
+    }
+
+    private generateGalaxyName(id: string, rng?: ReturnType<typeof alea>): string {
+        const localRng = rng || this.rng;
+        const prefixes = ['NGC', 'M', 'IC', 'UGC', 'PGC'];
+        const prefix = prefixes[Math.floor(localRng() * prefixes.length)];
+        const number = Math.floor(localRng() * 10000);
+        return `${prefix} ${number}`;
+    }
+
+    private generateStarName(rng?: ReturnType<typeof alea>): string {
+        const localRng = rng || this.rng;
+        const prefixes = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta'];
+        const suffixes = ['Centauri', 'Orionis', 'Cygni', 'Lyrae', 'Aquilae', 'Persei'];
+        return `${prefixes[Math.floor(localRng() * prefixes.length)]} ${suffixes[Math.floor(localRng() * suffixes.length)]}`;
+    }
+
+    private generatePlanetName(rng?: ReturnType<typeof alea>): string {
+        const localRng = rng || this.rng;
+        const names = ['Proxima', 'Terra', 'Nova', 'Prime', 'Kepler', 'Gliese', 'TRAPPIST'];
+        return names[Math.floor(localRng() * names.length)];
+    }
 }
+

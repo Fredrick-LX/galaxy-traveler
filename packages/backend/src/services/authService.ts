@@ -3,9 +3,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { createHash } from 'crypto';
 import { getData, putData, updateData, DB_PREFIX } from '@/db/db';
 import { generateToken, JwtPayload } from '@/utils/jwt';
+import { isValidEmail, isValidUsername, isValidPassword } from '@/utils/validators';
+import { hashPassword, generateResetToken } from '@/utils/crypto';
 
 /**
  * 用户数据结构
@@ -63,18 +64,17 @@ export interface ResetPasswordResult {
 export async function registerUser(email: string, name: string, password: string): Promise<RegisterResult> {
     try {
         // 验证邮箱格式
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!isValidEmail(email)) {
             return { success: false, message: '邮箱格式不正确' };
         }
 
         // 验证用户名长度
-        if (name.length < 2 || name.length > 20) {
+        if (!isValidUsername(name)) {
             return { success: false, message: '用户名长度必须在 2-20 个字符之间' };
         }
 
         // 验证密码强度
-        if (password.length < 6) {
+        if (!isValidPassword(password)) {
             return { success: false, message: '密码长度至少为 6 个字符' };
         }
 
@@ -90,7 +90,7 @@ export async function registerUser(email: string, name: string, password: string
         const uuid = uuidv4();
 
         // 加密密码
-        const hashedPassword = createHash('md5').update(password).digest('hex');
+        const hashedPassword = hashPassword(password);
 
         // 创建用户数据
         const userData: UserData = {
@@ -136,8 +136,7 @@ export async function registerUser(email: string, name: string, password: string
 export async function loginUser(email: string, password: string): Promise<LoginResult> {
     try {
         // 验证邮箱格式
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!isValidEmail(email)) {
             return { success: false, message: '邮箱格式不正确' };
         }
 
@@ -155,7 +154,7 @@ export async function loginUser(email: string, password: string): Promise<LoginR
         }
 
         // 验证密码
-        const hashedPassword = createHash('md5').update(password).digest('hex');
+        const hashedPassword = hashPassword(password);
         if (hashedPassword !== userData.password) {
             return { success: false, message: '密码错误' };
         }
@@ -207,7 +206,7 @@ export async function requestPasswordReset(email: string): Promise<ResetPassword
         }
 
         // 生成重置令牌（6位随机数字）
-        const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+        const resetToken = generateResetToken();
         const resetTokenExpires = Date.now() + 30 * 60 * 1000; // 30 分钟有效期
 
         // 更新用户数据
@@ -240,7 +239,7 @@ export async function resetPassword(
 ): Promise<ResetPasswordResult> {
     try {
         // 验证密码强度
-        if (newPassword.length < 6) {
+        if (!isValidPassword(newPassword)) {
             return { success: false, message: '密码长度至少为 6 个字符' };
         }
 
@@ -267,7 +266,7 @@ export async function resetPassword(
         }
 
         // 加密新密码
-        const hashedPassword = createHash('md5').update(newPassword).digest('hex');
+        const hashedPassword = hashPassword(newPassword);
 
         // 更新密码并清除重置令牌
         await updateData<UserData>(`${DB_PREFIX.USER_UUID}${uuid}`, {

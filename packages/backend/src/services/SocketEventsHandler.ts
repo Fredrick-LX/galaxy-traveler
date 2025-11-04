@@ -5,52 +5,23 @@
 import { Server, Socket } from 'socket.io';
 import { verifyToken } from '@/utils/jwt';
 import { getGameEngine } from './GameEngine';
+import { serializeGameState } from '@/utils/serializers';
 
 export class SocketEventsHandler {
     private io: Server;
     private gameEngine: ReturnType<typeof getGameEngine>;
-    
+
     constructor(io: Server) {
         this.io = io;
         this.gameEngine = getGameEngine();
     }
-    
+
     /**
      * 广播游戏状态更新
      */
     broadcastGameState() {
         const world = this.gameEngine.getWorld();
-        
-        const gameState = {
-            tick: world.tick,
-            timestamp: Date.now(),
-            ships: Array.from(world.ships.values()).map(ship => ({
-                instanceId: ship.instanceId,
-                ownerId: ship.ownerId,
-                position: ship.position,
-                status: ship.status,
-                currentHealth: ship.currentHealth,
-                cargo: Object.fromEntries(ship.cargo),
-                cargoCapacity: ship.cargoCapacity,
-                actionProgress: ship.actionProgress,
-            })),
-            resourceNodes: Array.from(world.resourceNodes.values()).map(node => ({
-                id: node.id,
-                resourceType: node.resourceType,
-                position: node.position,
-                currentAmount: node.currentAmount,
-                amount: node.amount,
-            })),
-            structures: Array.from(world.structures.values()).map(structure => ({
-                id: structure.id,
-                type: structure.type,
-                ownerId: structure.ownerId,
-                position: structure.position,
-                cargo: Object.fromEntries(structure.cargo),
-                cargoCapacity: structure.cargoCapacity,
-            })),
-        };
-        
+        const gameState = serializeGameState(world);
         this.io.emit('gameStateUpdate', gameState);
     }
 
@@ -199,9 +170,9 @@ export class SocketEventsHandler {
             // TODO: 实现建造逻辑
             console.log(`用户 ${userId} 建造 ${buildingId} 在 (${x}, ${y})`);
 
-            socket.emit('command:result', { 
-                command: 'buildStructure', 
-                buildingId, 
+            socket.emit('command:result', {
+                command: 'buildStructure',
+                buildingId,
                 result: 0 // OK
             });
         });
@@ -218,9 +189,9 @@ export class SocketEventsHandler {
             // TODO: 实现拆除逻辑
             console.log(`拆除建筑 ${structureId}`);
 
-            socket.emit('command:result', { 
-                command: 'demolish', 
-                structureId, 
+            socket.emit('command:result', {
+                command: 'demolish',
+                structureId,
                 result: 0 // OK
             });
         });
@@ -228,37 +199,7 @@ export class SocketEventsHandler {
         // 请求当前游戏状态
         socket.on('requestGameState', () => {
             const world = this.gameEngine.getWorld();
-            
-            const gameState = {
-                tick: world.tick,
-                timestamp: Date.now(),
-                ships: Array.from(world.ships.values()).map(ship => ({
-                    instanceId: ship.instanceId,
-                    ownerId: ship.ownerId,
-                    position: ship.position,
-                    status: ship.status,
-                    currentHealth: ship.currentHealth,
-                    cargo: Object.fromEntries(ship.cargo),
-                    cargoCapacity: ship.cargoCapacity,
-                    actionProgress: ship.actionProgress,
-                })),
-                resourceNodes: Array.from(world.resourceNodes.values()).map(node => ({
-                    id: node.id,
-                    resourceType: node.resourceType,
-                    position: node.position,
-                    currentAmount: node.currentAmount,
-                    amount: node.amount,
-                })),
-                structures: Array.from(world.structures.values()).map(structure => ({
-                    id: structure.id,
-                    type: structure.type,
-                    ownerId: structure.ownerId,
-                    position: structure.position,
-                    cargo: Object.fromEntries(structure.cargo),
-                    cargoCapacity: structure.cargoCapacity,
-                })),
-            };
-            
+            const gameState = serializeGameState(world);
             socket.emit('gameState', gameState);
         });
     }

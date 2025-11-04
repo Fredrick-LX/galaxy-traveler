@@ -8,65 +8,90 @@ import type { Galaxy } from '@galaxy-traveler/shared';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
+    success: boolean;
+    data?: T;
+    error?: string;
 }
 
 interface GalaxyNetworkData {
-  galaxies: { [id: string]: Galaxy };
-  connections: { [id: string]: string[] };
-  seed: number;
+    galaxies: { [id: string]: Galaxy };
+    connections: { [id: string]: string[] };
+    seed: number;
 }
 
 /**
  * 获取星系网络数据
  */
 export async function getGalaxyNetwork(seed?: number) {
-  const url = seed 
-    ? `${API_BASE_URL}/galaxy/network?seed=${seed}` 
-    : `${API_BASE_URL}/galaxy/network`;
-  
-  const response = await axios.get<ApiResponse<GalaxyNetworkData>>(url);
-  return response.data;
+    const url = seed
+        ? `${API_BASE_URL}/galaxy/network?seed=${seed}`
+        : `${API_BASE_URL}/galaxy/network`;
+
+    const response = await axios.get<ApiResponse<GalaxyNetworkData>>(url);
+    return response.data;
 }
 
 /**
  * 获取单个星系详情
  */
 export async function getGalaxyById(id: string) {
-  const response = await axios.get<ApiResponse<Galaxy>>(
-    `${API_BASE_URL}/galaxy/galaxy/${id}`
-  );
-  return response.data;
+    const response = await axios.get<ApiResponse<Galaxy>>(
+        `${API_BASE_URL}/galaxy/galaxy/${id}`
+    );
+    return response.data;
 }
 
 /**
  * 重新生成星系网络
  */
 export async function regenerateGalaxyNetwork(seed?: number, galaxyCount?: number) {
-  const response = await axios.post<ApiResponse<GalaxyNetworkData>>(
-    `${API_BASE_URL}/galaxy/regenerate`,
-    { seed, galaxyCount }
-  );
-  return response.data;
+    const response = await axios.post<ApiResponse<GalaxyNetworkData>>(
+        `${API_BASE_URL}/galaxy/regenerate`,
+        { seed, galaxyCount }
+    );
+    return response.data;
 }
 
 /**
  * 获取指定区域的星系
  */
 export async function getGalaxiesInRegion(
-  minX: number,
-  maxX: number,
-  minY: number,
-  maxY: number
+    minX: number,
+    maxX: number,
+    minY: number,
+    maxY: number
 ) {
-  const response = await axios.get<ApiResponse<{ galaxies: Galaxy[] }>>(
-    `${API_BASE_URL}/galaxy/region`,
-    {
-      params: { minX, maxX, minY, maxY }
-    }
-  );
-  return response.data;
+    const response = await axios.get<ApiResponse<{ galaxies: Galaxy[] }>>(
+        `${API_BASE_URL}/galaxy/region`,
+        {
+            params: { minX, maxX, minY, maxY }
+        }
+    );
+    return response.data;
+}
+
+/**
+ * 选择起始星系并创建探索船
+ */
+export async function selectStartingGalaxy(galaxyId: string) {
+    const token = localStorage.getItem('auth_token');
+    const response = await axios.post<ApiResponse<{
+        galaxyId: string;
+        ship: {
+            instanceId: string;
+            shipId: string;
+            position: { x: number; y: number; z: number };
+            cargoCapacity: number;
+        };
+    }>>(
+        `${API_BASE_URL}/galaxy/select-starting-galaxy`,
+        { galaxyId },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+    return response.data;
 }
 

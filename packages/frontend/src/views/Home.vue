@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
-import type { User } from '../types/auth';
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import type { User } from "../types/auth";
 
 const router = useRouter();
 const user = ref<User | null>(null);
@@ -10,13 +10,13 @@ let countdownTimer: number | null = null;
 
 onMounted(() => {
     // 从本地存储获取用户信息
-    const userInfo = localStorage.getItem('user_info');
+    const userInfo = localStorage.getItem("user_info");
     if (userInfo) {
         user.value = JSON.parse(userInfo);
         startCountdown();
     } else {
         // 如果没有用户信息，跳转到登录页
-        router.push('/login');
+        router.push("/login");
     }
 });
 
@@ -45,7 +45,7 @@ function enterGame() {
     if (countdownTimer !== null) {
         clearInterval(countdownTimer);
     }
-    router.push('/game');
+    router.push("/game");
 }
 </script>
 
@@ -58,13 +58,17 @@ function enterGame() {
                     <p class="user-greeting">
                         你好，<span class="display-name">
                             <strong class="username">{{ user.name }}</strong>
-                            <span class="uuid-suffix">#{{ user.uuid.substring(0, 8) }}</span>
-                        </span>！
+                            <span class="uuid-suffix"
+                                >#{{ user.uuid.substring(0, 8) }}</span
+                            > </span
+                        >！
                     </p>
                     <p class="success-text">登录成功</p>
                 </div>
                 <div class="countdown-info">
-                    <p class="countdown-text">{{ countdown }} 秒后自动进入游戏</p>
+                    <p class="countdown-text">
+                        {{ countdown }} 秒后自动进入游戏
+                    </p>
                 </div>
                 <div class="actions">
                     <button class="primary-button" @click="enterGame">
@@ -82,7 +86,7 @@ function enterGame() {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #EEEEEE;
+    background: #eeeeee;
     padding: 20px;
 }
 
@@ -92,7 +96,7 @@ function enterGame() {
 }
 
 .welcome-card {
-    background: #FFFFFF;
+    background: #ffffff;
     border: 3px solid #000000;
     border-radius: 0;
     box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
@@ -111,7 +115,7 @@ function enterGame() {
 }
 
 .user-info {
-    background: #F5F5F5;
+    background: #f5f5f5;
     border: 2px solid #000000;
     border-radius: 0;
     padding: 24px;
@@ -122,7 +126,7 @@ function enterGame() {
     font-size: 16px;
     color: #000000;
     margin: 0 0 8px 0;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .display-name {
@@ -146,13 +150,13 @@ function enterGame() {
     font-size: 14px;
     color: #666666;
     margin: 8px 0 0 0;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .countdown-info {
     margin: 24px 0;
     padding: 16px;
-    background: #F0F0F0;
+    background: #f0f0f0;
     border: 2px solid #000000;
     border-radius: 0;
 }
@@ -162,7 +166,7 @@ function enterGame() {
     font-weight: 700;
     color: #000000;
     margin: 0;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     letter-spacing: 1px;
 }
 
@@ -176,8 +180,8 @@ function enterGame() {
     padding: 12px 32px;
     font-size: 14px;
     font-weight: 700;
-    font-family: 'Courier New', Courier, monospace;
-    color: #FFFFFF;
+    font-family: "Courier New", Courier, monospace;
+    color: #ffffff;
     background: #000000;
     border: 2px solid #000000;
     border-radius: 0;
@@ -188,7 +192,7 @@ function enterGame() {
 }
 
 .primary-button:hover {
-    background: #FFFFFF;
+    background: #ffffff;
     color: #000000;
     box-shadow: 4px 4px 0 #000000;
     transform: translate(-2px, -2px);
@@ -199,4 +203,3 @@ function enterGame() {
     box-shadow: 2px 2px 0 #000000;
 }
 </style>
-

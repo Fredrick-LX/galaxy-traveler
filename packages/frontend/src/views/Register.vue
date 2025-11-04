@@ -1,66 +1,66 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { register } from '../api/auth';
-import type { RegisterRequest } from '../types/auth';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { register } from "../api/auth";
+import type { RegisterRequest } from "../types/auth";
 
 const router = useRouter();
 
 // 表单数据
 const formData = ref<RegisterRequest>({
-    email: '',
-    name: '',
-    password: '',
+    email: "",
+    name: "",
+    password: "",
 });
 
-const confirmPassword = ref('');
+const confirmPassword = ref("");
 
 // UI 状态
 const loading = ref(false);
-const errorMessage = ref('');
+const errorMessage = ref("");
 
 /**
  * 处理注册
  */
 async function handleRegister() {
     // 清空错误信息
-    errorMessage.value = '';
+    errorMessage.value = "";
 
     // 验证输入
     if (!formData.value.email.trim()) {
-        errorMessage.value = '请输入邮箱';
+        errorMessage.value = "请输入邮箱";
         return;
     }
 
     // 验证邮箱格式
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.value.email)) {
-        errorMessage.value = '邮箱格式不正确';
+        errorMessage.value = "邮箱格式不正确";
         return;
     }
 
     if (!formData.value.name.trim()) {
-        errorMessage.value = '请输入用户名';
+        errorMessage.value = "请输入用户名";
         return;
     }
 
     if (formData.value.name.length < 2 || formData.value.name.length > 20) {
-        errorMessage.value = '用户名长度必须在 2-20 个字符之间';
+        errorMessage.value = "用户名长度必须在 2-20 个字符之间";
         return;
     }
 
     if (!formData.value.password) {
-        errorMessage.value = '请输入密码';
+        errorMessage.value = "请输入密码";
         return;
     }
 
     if (formData.value.password.length < 6) {
-        errorMessage.value = '密码长度至少为 6 个字符';
+        errorMessage.value = "密码长度至少为 6 个字符";
         return;
     }
 
     if (formData.value.password !== confirmPassword.value) {
-        errorMessage.value = '两次输入的密码不一致';
+        errorMessage.value = "两次输入的密码不一致";
         return;
     }
 
@@ -71,16 +71,16 @@ async function handleRegister() {
 
         if (result.success && result.token && result.user) {
             // 保存 token 和用户信息
-            localStorage.setItem('auth_token', result.token);
-            localStorage.setItem('user_info', JSON.stringify(result.user));
+            localStorage.setItem("auth_token", result.token);
+            localStorage.setItem("user_info", JSON.stringify(result.user));
 
             // 跳转到主页
-            router.push('/');
+            router.push("/");
         } else {
             errorMessage.value = result.message;
         }
     } catch (error) {
-        errorMessage.value = '注册失败，请稍后重试';
+        errorMessage.value = "注册失败，请稍后重试";
     } finally {
         loading.value = false;
     }
@@ -90,7 +90,7 @@ async function handleRegister() {
  * 跳转到登录页面
  */
 function goToLogin() {
-    router.push('/login');
+    router.push("/login");
 }
 </script>
 
@@ -143,7 +143,9 @@ function goToLogin() {
                 </div>
 
                 <div class="form-group">
-                    <label for="confirmPassword" class="form-label">确认密码</label>
+                    <label for="confirmPassword" class="form-label"
+                        >确认密码</label
+                    >
                     <input
                         id="confirmPassword"
                         v-model="confirmPassword"
@@ -160,7 +162,7 @@ function goToLogin() {
                 </div>
 
                 <button type="submit" class="submit-button" :disabled="loading">
-                    {{ loading ? '注册中...' : '注册' }}
+                    {{ loading ? "注册中..." : "注册" }}
                 </button>
             </form>
 
@@ -180,12 +182,12 @@ function goToLogin() {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #EEEEEE;
+    background: #eeeeee;
     padding: 20px;
 }
 
 .register-card {
-    background: #FFFFFF;
+    background: #ffffff;
     border: 3px solid #000000;
     border-radius: 0;
     box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
@@ -237,10 +239,10 @@ function goToLogin() {
     width: 100%;
     padding: 12px;
     font-size: 14px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     border: 2px solid #333333;
     border-radius: 0;
-    background: #FFFFFF;
+    background: #ffffff;
     color: #000000;
     transition: all 0.1s;
     box-sizing: border-box;
@@ -249,17 +251,17 @@ function goToLogin() {
 .form-input:focus {
     outline: none;
     border-color: #000000;
-    box-shadow: 0 0 0 2px #CCCCCC;
+    box-shadow: 0 0 0 2px #cccccc;
 }
 
 .form-input:disabled {
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
     color: #999999;
     cursor: not-allowed;
 }
 
 .error-message {
-    background-color: #EEEEEE;
+    background-color: #eeeeee;
     color: #000000;
     border: 2px solid #000000;
     padding: 12px;
@@ -273,8 +275,8 @@ function goToLogin() {
     padding: 14px;
     font-size: 14px;
     font-weight: 700;
-    font-family: 'Courier New', Courier, monospace;
-    color: #FFFFFF;
+    font-family: "Courier New", Courier, monospace;
+    color: #ffffff;
     background: #000000;
     border: 2px solid #000000;
     border-radius: 0;
@@ -285,7 +287,7 @@ function goToLogin() {
 }
 
 .submit-button:hover:not(:disabled) {
-    background: #FFFFFF;
+    background: #ffffff;
     color: #000000;
     box-shadow: 4px 4px 0 #000000;
     transform: translate(-2px, -2px);
@@ -299,7 +301,7 @@ function goToLogin() {
 .submit-button:disabled {
     background: #666666;
     border-color: #666666;
-    color: #CCCCCC;
+    color: #cccccc;
     cursor: not-allowed;
 }
 
@@ -323,7 +325,7 @@ function goToLogin() {
     border: none;
     color: #000000;
     font-size: 12px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     cursor: pointer;
     transition: all 0.1s;
     padding: 0;
@@ -334,4 +336,3 @@ function goToLogin() {
     color: #666666;
 }
 </style>
-

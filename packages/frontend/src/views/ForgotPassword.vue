@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { requestPasswordReset, resetPassword } from '../api/auth';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { requestPasswordReset, resetPassword } from "../api/auth";
 
 const router = useRouter();
 
@@ -9,34 +9,34 @@ const router = useRouter();
 const step = ref(1);
 
 // 表单数据
-const email = ref('');
-const resetToken = ref('');
-const newPassword = ref('');
-const confirmPassword = ref('');
+const email = ref("");
+const resetToken = ref("");
+const newPassword = ref("");
+const confirmPassword = ref("");
 
 // UI 状态
 const loading = ref(false);
-const errorMessage = ref('');
-const successMessage = ref('');
+const errorMessage = ref("");
+const successMessage = ref("");
 
 /**
  * 请求重置密码
  */
 async function handleRequestReset() {
     // 清空消息
-    errorMessage.value = '';
-    successMessage.value = '';
+    errorMessage.value = "";
+    successMessage.value = "";
 
     // 验证输入
     if (!email.value.trim()) {
-        errorMessage.value = '请输入邮箱';
+        errorMessage.value = "请输入邮箱";
         return;
     }
 
     // 验证邮箱格式
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.value)) {
-        errorMessage.value = '邮箱格式不正确';
+        errorMessage.value = "邮箱格式不正确";
         return;
     }
 
@@ -53,7 +53,7 @@ async function handleRequestReset() {
             errorMessage.value = result.message;
         }
     } catch (error) {
-        errorMessage.value = '请求失败，请稍后重试';
+        errorMessage.value = "请求失败，请稍后重试";
     } finally {
         loading.value = false;
     }
@@ -64,27 +64,27 @@ async function handleRequestReset() {
  */
 async function handleResetPassword() {
     // 清空消息
-    errorMessage.value = '';
-    successMessage.value = '';
+    errorMessage.value = "";
+    successMessage.value = "";
 
     // 验证输入
     if (!resetToken.value.trim()) {
-        errorMessage.value = '请输入重置码';
+        errorMessage.value = "请输入重置码";
         return;
     }
 
     if (!newPassword.value) {
-        errorMessage.value = '请输入新密码';
+        errorMessage.value = "请输入新密码";
         return;
     }
 
     if (newPassword.value.length < 6) {
-        errorMessage.value = '密码长度至少为 6 个字符';
+        errorMessage.value = "密码长度至少为 6 个字符";
         return;
     }
 
     if (newPassword.value !== confirmPassword.value) {
-        errorMessage.value = '两次输入的密码不一致';
+        errorMessage.value = "两次输入的密码不一致";
         return;
     }
 
@@ -98,17 +98,17 @@ async function handleResetPassword() {
         });
 
         if (result.success) {
-            successMessage.value = result.message + '，即将跳转到登录页面...';
-            
+            successMessage.value = result.message + "，即将跳转到登录页面...";
+
             // 3秒后跳转到登录页面
             setTimeout(() => {
-                router.push('/login');
+                router.push("/login");
             }, 3000);
         } else {
             errorMessage.value = result.message;
         }
     } catch (error) {
-        errorMessage.value = '重置失败，请稍后重试';
+        errorMessage.value = "重置失败，请稍后重试";
     } finally {
         loading.value = false;
     }
@@ -120,13 +120,13 @@ async function handleResetPassword() {
 function goBack() {
     if (step.value === 2) {
         step.value = 1;
-        resetToken.value = '';
-        newPassword.value = '';
-        confirmPassword.value = '';
-        errorMessage.value = '';
-        successMessage.value = '';
+        resetToken.value = "";
+        newPassword.value = "";
+        confirmPassword.value = "";
+        errorMessage.value = "";
+        successMessage.value = "";
     } else {
-        router.push('/login');
+        router.push("/login");
     }
 }
 
@@ -134,7 +134,7 @@ function goBack() {
  * 跳转到登录页面
  */
 function goToLogin() {
-    router.push('/login');
+    router.push("/login");
 }
 </script>
 
@@ -144,12 +144,20 @@ function goToLogin() {
             <div class="forgot-password-header">
                 <h1 class="forgot-password-title">找回密码</h1>
                 <p class="forgot-password-subtitle">
-                    {{ step === 1 ? '我们将发送重置码到您的邮箱' : '请输入重置码和新密码' }}
+                    {{
+                        step === 1
+                            ? "我们将发送重置码到您的邮箱"
+                            : "请输入重置码和新密码"
+                    }}
                 </p>
             </div>
 
             <!-- 步骤 1: 请求重置码 -->
-            <form v-if="step === 1" @submit.prevent="handleRequestReset" class="forgot-password-form">
+            <form
+                v-if="step === 1"
+                @submit.prevent="handleRequestReset"
+                class="forgot-password-form"
+            >
                 <div class="form-group">
                     <label for="email" class="form-label">邮箱</label>
                     <input
@@ -172,12 +180,16 @@ function goToLogin() {
                 </div>
 
                 <button type="submit" class="submit-button" :disabled="loading">
-                    {{ loading ? '发送中...' : '发送重置码' }}
+                    {{ loading ? "发送中..." : "发送重置码" }}
                 </button>
             </form>
 
             <!-- 步骤 2: 重置密码 -->
-            <form v-if="step === 2" @submit.prevent="handleResetPassword" class="forgot-password-form">
+            <form
+                v-if="step === 2"
+                @submit.prevent="handleResetPassword"
+                class="forgot-password-form"
+            >
                 <div class="form-group">
                     <label for="resetToken" class="form-label">重置码</label>
                     <input
@@ -189,7 +201,9 @@ function goToLogin() {
                         :disabled="loading"
                         maxlength="6"
                     />
-                    <p class="form-hint">重置码已发送到 {{ email }}（开发模式下请查看后端控制台）</p>
+                    <p class="form-hint">
+                        重置码已发送到 {{ email }}（开发模式下请查看后端控制台）
+                    </p>
                 </div>
 
                 <div class="form-group">
@@ -206,7 +220,9 @@ function goToLogin() {
                 </div>
 
                 <div class="form-group">
-                    <label for="confirmPassword" class="form-label">确认新密码</label>
+                    <label for="confirmPassword" class="form-label"
+                        >确认新密码</label
+                    >
                     <input
                         id="confirmPassword"
                         v-model="confirmPassword"
@@ -227,16 +243,21 @@ function goToLogin() {
                 </div>
 
                 <button type="submit" class="submit-button" :disabled="loading">
-                    {{ loading ? '重置中...' : '重置密码' }}
+                    {{ loading ? "重置中..." : "重置密码" }}
                 </button>
             </form>
 
             <div class="forgot-password-footer">
                 <button type="button" class="link-button" @click="goBack">
-                    {{ step === 1 ? '返回登录' : '返回上一步' }}
+                    {{ step === 1 ? "返回登录" : "返回上一步" }}
                 </button>
                 <span v-if="step === 1" class="divider">|</span>
-                <button v-if="step === 1" type="button" class="link-button" @click="goToLogin">
+                <button
+                    v-if="step === 1"
+                    type="button"
+                    class="link-button"
+                    @click="goToLogin"
+                >
                     记起密码了？
                 </button>
             </div>
@@ -250,12 +271,12 @@ function goToLogin() {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #EEEEEE;
+    background: #eeeeee;
     padding: 20px;
 }
 
 .forgot-password-card {
-    background: #FFFFFF;
+    background: #ffffff;
     border: 3px solid #000000;
     border-radius: 0;
     box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
@@ -307,10 +328,10 @@ function goToLogin() {
     width: 100%;
     padding: 12px;
     font-size: 14px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     border: 2px solid #333333;
     border-radius: 0;
-    background: #FFFFFF;
+    background: #ffffff;
     color: #000000;
     transition: all 0.1s;
     box-sizing: border-box;
@@ -319,11 +340,11 @@ function goToLogin() {
 .form-input:focus {
     outline: none;
     border-color: #000000;
-    box-shadow: 0 0 0 2px #CCCCCC;
+    box-shadow: 0 0 0 2px #cccccc;
 }
 
 .form-input:disabled {
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
     color: #999999;
     cursor: not-allowed;
 }
@@ -332,11 +353,11 @@ function goToLogin() {
     margin-top: 8px;
     font-size: 11px;
     color: #666666;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .error-message {
-    background-color: #EEEEEE;
+    background-color: #eeeeee;
     color: #000000;
     border: 2px solid #000000;
     padding: 12px;
@@ -346,7 +367,7 @@ function goToLogin() {
 }
 
 .success-message {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     color: #000000;
     border: 2px solid #000000;
     padding: 12px;
@@ -360,8 +381,8 @@ function goToLogin() {
     padding: 14px;
     font-size: 14px;
     font-weight: 700;
-    font-family: 'Courier New', Courier, monospace;
-    color: #FFFFFF;
+    font-family: "Courier New", Courier, monospace;
+    color: #ffffff;
     background: #000000;
     border: 2px solid #000000;
     border-radius: 0;
@@ -372,7 +393,7 @@ function goToLogin() {
 }
 
 .submit-button:hover:not(:disabled) {
-    background: #FFFFFF;
+    background: #ffffff;
     color: #000000;
     box-shadow: 4px 4px 0 #000000;
     transform: translate(-2px, -2px);
@@ -386,7 +407,7 @@ function goToLogin() {
 .submit-button:disabled {
     background: #666666;
     border-color: #666666;
-    color: #CCCCCC;
+    color: #cccccc;
     cursor: not-allowed;
 }
 
@@ -405,7 +426,7 @@ function goToLogin() {
     border: none;
     color: #000000;
     font-size: 12px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     cursor: pointer;
     transition: all 0.1s;
     padding: 0;
@@ -421,4 +442,3 @@ function goToLogin() {
     font-weight: 700;
 }
 </style>
-
