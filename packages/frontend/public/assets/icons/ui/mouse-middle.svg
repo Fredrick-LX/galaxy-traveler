@@ -1,0 +1,11 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 鼠标中键拖拽图标 -->
+  <!-- 鼠标轮廓 -->
+  <path d="M 26 16 Q 26 12 30 12 L 34 12 Q 38 12 38 16 L 38 48 Q 38 52 34 52 L 30 52 Q 26 52 26 48 Z" fill="none" stroke="#000000" stroke-width="3"/>
+  <!-- 中键高亮 -->
+  <rect x="30" y="22" width="4" height="12" fill="#000000"/>
+  <!-- 拖拽方向箭头 -->
+  <polyline points="18,32 14,32 18,28 14,32 18,36" fill="none" stroke="#666666" stroke-width="2" stroke-linecap="square"/>
+  <polyline points="46,32 50,32 46,28 50,32 46,36" fill="none" stroke="#666666" stroke-width="2" stroke-linecap="square"/>
+</svg>
+

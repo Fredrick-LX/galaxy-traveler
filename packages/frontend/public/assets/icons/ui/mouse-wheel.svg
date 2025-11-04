@@ -1,0 +1,11 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 鼠标滚轮图标 -->
+  <!-- 鼠标轮廓 -->
+  <path d="M 26 16 Q 26 12 30 12 L 34 12 Q 38 12 38 16 L 38 48 Q 38 52 34 52 L 30 52 Q 26 52 26 48 Z" fill="none" stroke="#000000" stroke-width="3"/>
+  <!-- 滚轮 -->
+  <rect x="30" y="22" width="4" height="12" fill="#666666"/>
+  <!-- 滚动方向箭头 -->
+  <polyline points="32,18 32,14 28,18 32,14 36,18" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="square"/>
+  <polyline points="32,46 32,50 28,46 32,50 36,46" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="square"/>
+</svg>
+

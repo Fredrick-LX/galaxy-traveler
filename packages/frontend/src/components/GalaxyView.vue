@@ -50,9 +50,18 @@
 
         <!-- 操作提示 -->
         <div class="control-hints">
-            <div class="hint-item">🖱️ 滚轮：缩放</div>
-            <div class="hint-item">🖱️ 中键拖拽：移动视图</div>
-            <div class="hint-item">🖱️ 左键：选择 / 右键：命令</div>
+            <div class="hint-item">
+                <img src="/assets/icons/ui/mouse-wheel.svg" alt="滚轮" class="hint-icon" />
+                滚轮：缩放
+            </div>
+            <div class="hint-item">
+                <img src="/assets/icons/ui/mouse-middle.svg" alt="中键" class="hint-icon" />
+                中键拖拽：移动视图
+            </div>
+            <div class="hint-item">
+                <img src="/assets/icons/ui/mouse-buttons.svg" alt="左右键" class="hint-icon" />
+                左键：选择 / 右键：命令
+            </div>
         </div>
 
         <!-- 控制面板 -->
@@ -658,10 +667,15 @@ function createLabel(
     x: number,
     y: number
 ): Text {
+    // 使用较大的基础字体大小（48px）渲染高质量文字
+    // 然后通过缩放控制实际显示大小，避免小字体模糊问题
+    const baseFontSize = 48;
+    const scaleFactor = fontSize / baseFontSize;
+    
     const label = new Text({
-        text,
+        text: text,
         style: new TextStyle({
-            fontSize,
+            fontSize: baseFontSize,
             fill: 0x000000,
             fontFamily: "Courier New, monospace",
             fontWeight: "700",
@@ -670,6 +684,7 @@ function createLabel(
     label.anchor.set(0, 0.5);
     label.x = x;
     label.y = y;
+    label.scale.set(scaleFactor);
     return label;
 }
 
@@ -1128,9 +1143,18 @@ function goBack() {
 }
 
 .hint-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     color: #000000;
     font-weight: 600;
     white-space: nowrap;
+}
+
+.hint-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 .celestial-list {

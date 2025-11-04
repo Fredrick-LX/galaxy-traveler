@@ -18,7 +18,7 @@
                         class="unit-icon"
                         :class="unit.type"
                     >
-                        {{ getUnitIcon(unit.type) }}
+                        <img :src="getUnitIcon(unit.type)" :alt="unit.type" />
                     </div>
                 </div>
             </div>
@@ -189,7 +189,9 @@ const selectedStructure = computed(() => {
 });
 
 function getUnitIcon(type: string): string {
-    return type === "ship" ? "🚀" : "🏭";
+    return type === "ship"
+        ? "/assets/icons/ships/engineer_1.svg"
+        : "/assets/icons/buildings/shipyard.svg";
 }
 
 function getStatusText(status: string): string {
@@ -299,9 +301,14 @@ function commandTransfer() {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
     background: #eeeeee;
     border: 2px solid #cccccc;
+}
+
+.unit-icon img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
 }
 
 .unit-icon.ship {

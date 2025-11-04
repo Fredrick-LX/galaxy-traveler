@@ -61,6 +61,22 @@
             </div>
         </div>
 
+        <!-- 操作提示 -->
+        <div class="control-hints">
+            <div class="hint-item">
+                <img src="/assets/icons/ui/mouse-wheel.svg" alt="滚轮" class="hint-icon" />
+                滚轮：缩放
+            </div>
+            <div class="hint-item">
+                <img src="/assets/icons/ui/mouse-middle.svg" alt="中键" class="hint-icon" />
+                中键拖拽：移动地图
+            </div>
+            <div class="hint-item">
+                <img src="/assets/icons/ui/mouse-buttons.svg" alt="左键" class="hint-icon" />
+                左键：选择星系
+            </div>
+        </div>
+
         <div v-if="loading" class="loading-overlay">
             <div class="loading-spinner"></div>
             <p>加载中...</p>
@@ -748,6 +764,38 @@ function cleanup() {
     background: #333333;
     box-shadow: 3px 3px 0 #000000;
     transform: translate(-1px, -1px);
+}
+
+/* 操作提示 */
+.control-hints {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 20px;
+    border: 2px solid #000000;
+    border-radius: 0;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+    font-family: "Courier New", monospace;
+    z-index: 40;
+}
+
+.hint-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #000000;
+}
+
+.hint-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
 }
 
 .loading-overlay {
