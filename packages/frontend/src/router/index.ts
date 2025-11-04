@@ -11,7 +11,6 @@ import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import ForgotPassword from '../views/ForgotPassword.vue';
 import GameMain from '../views/GameMain.vue';
-import CodeEditor from '../views/CodeEditor.vue';
 
 // 路由定义
 const routes: RouteRecordRaw[] = [
@@ -25,12 +24,6 @@ const routes: RouteRecordRaw[] = [
         path: '/game',
         name: 'GameMain',
         component: GameMain,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: '/code',
-        name: 'CodeEditor',
-        component: CodeEditor,
         meta: { requiresAuth: true },
     },
     {

@@ -10,6 +10,19 @@
 
     <div ref="viewCanvas" class="view-canvas"></div>
 
+    <!-- 控制面板 -->
+    <UnitControlPanel 
+      :selected-units="getSelectedUnitsInfo()"
+      @close="clearSelection"
+      @command="handleCommand"
+      @demolish="handleDemolish"
+    />
+
+    <!-- 建造菜单 -->
+    <BuildingMenu 
+      @place-building="startBuildingPlacement"
+    />
+
     <div class="celestial-list">
       <h3>天体列表</h3>
       <div class="body-item" v-for="body in sortedBodies" :key="body.id"
@@ -34,7 +47,9 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { Application, Graphics, Container, Text, TextStyle, Sprite, Assets } from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
-import type { Galaxy, CelestialBody, CelestialType } from '@galaxy-traveler/shared';
+import type { Galaxy, CelestialBody, CelestialType, GameShip, GameResourceNode, GameStructure } from '@galaxy-traveler/shared';
+import UnitControlPanel from './UnitControlPanel.vue';
+import BuildingMenu from './BuildingMenu.vue';
 
 const props = defineProps<{
   galaxy: Galaxy
@@ -49,7 +64,27 @@ const viewCanvas = ref<HTMLDivElement | null>(null);
 let app: Application | null = null;
 let viewport: Viewport | null = null;
 let bodiesContainer: Container | null = null;
+let gameObjectsContainer: Container | null = null;
 let assetsLoaded = false;
+
+// 游戏对象数据（模拟数据，后续从后端获取）
+const ships = ref<Map<string, GameShip>>(new Map());
+const resourceNodes = ref<Map<string, GameResourceNode>>(new Map());
+const structures = ref<Map<string, GameStructure>>(new Map());
+
+// 选中的对象
+const selectedObjects = ref<Set<string>>(new Set());
+
+// 框选相关
+const isDraggingSelection = ref(false);
+const selectionStart = ref<{ x: number; y: number } | null>(null);
+const selectionEnd = ref<{ x: number; y: number } | null>(null);
+let selectionBox: Graphics | null = null;
+
+// 建筑放置相关
+const isPlacingBuilding = ref(false);
+const placingBuildingId = ref<string | null>(null);
+let buildingPreview: Graphics | null = null;
 
 const sortedBodies = computed(() => {
   if (!props.galaxy) return [];
@@ -103,7 +138,9 @@ async function initializeView() {
 
     // 启用拖拽和缩放
     viewport
-      .drag()
+      .drag({
+        mouseButtons: 'middle' // 只用中键拖拽地图
+      })
       .pinch()
       .wheel()
       .decelerate()
@@ -112,6 +149,25 @@ async function initializeView() {
         minScale: 2.0,
         maxScale: 15.0
       });
+
+    // 添加框选图层
+    selectionBox = new Graphics();
+    viewport.addChild(selectionBox);
+
+    // 添加建筑预览图层
+    buildingPreview = new Graphics();
+    viewport.addChild(buildingPreview);
+
+    // 设置viewport交互
+    viewport.eventMode = 'static';
+    
+    // 左键框选/放置
+    viewport.on('pointerdown', handlePointerDown);
+    viewport.on('pointermove', handlePointerMove);
+    viewport.on('pointerup', handlePointerUp);
+    
+    // 右键命令/取消
+    viewport.on('rightclick', handleRightClick);
 
     // 绘制星系视图
     renderGalaxyView();
@@ -162,9 +218,20 @@ function renderGalaxyView() {
     bodiesContainer!.addChild(node);
   });
 
+  // 绘制游戏对象容器
+  gameObjectsContainer = new Container();
+  viewport.addChild(gameObjectsContainer);
+
+  // 初始化测试数据
+  initializeTestGameObjects();
+  
+  // 渲染游戏对象
+  renderGameObjects();
+
   // 动画循环
   app!.ticker.add(() => {
     animateBodies();
+    updateGameObjects();
   });
 }
 
@@ -278,6 +345,391 @@ function animateBodies() {
   // 可以在这里添加天体的轨道运动
 }
 
+// 初始化测试游戏对象数据
+function initializeTestGameObjects() {
+  // 创建测试飞船
+  const testShip: GameShip = {
+    instanceId: 'ship_1',
+    shipId: 'engineer_1',
+    ownerId: 'player_1',
+    currentHealth: 100,
+    position: { x: 25, y: 22, z: 0 },
+    status: 'idle' as any,
+    cargo: new Map(),
+    cargoCapacity: 100,
+    logs: [],
+  };
+  ships.value.set(testShip.instanceId, testShip);
+
+  // 创建测试资源节点
+  const testResource: GameResourceNode = {
+    id: 'resource_iron_1',
+    resourceType: 'iron_ore' as any,
+    position: { x: 28, y: 25, z: 0 },
+    amount: 1000,
+    currentAmount: 1000,
+    lastHarvestTick: 0,
+  };
+  resourceNodes.value.set(testResource.id, testResource);
+
+  // 创建测试建筑
+  const testStructure: GameStructure = {
+    id: 'storage_1',
+    type: 'storage',
+    position: { x: 22, y: 25, z: 0 },
+    cargo: new Map(),
+    cargoCapacity: 500,
+    cargoUsed: 0,
+    ownerId: 'player_1',
+  };
+  structures.value.set(testStructure.id, testStructure);
+}
+
+// 渲染游戏对象
+function renderGameObjects() {
+  if (!gameObjectsContainer) return;
+
+  // 清空容器
+  gameObjectsContainer.removeChildren();
+
+  // 渲染资源节点
+  resourceNodes.value.forEach(node => {
+    const sprite = createResourceNode(node);
+    gameObjectsContainer!.addChild(sprite);
+  });
+
+  // 渲染建筑
+  structures.value.forEach(structure => {
+    const sprite = createStructure(structure);
+    gameObjectsContainer!.addChild(sprite);
+  });
+
+  // 渲染飞船
+  ships.value.forEach(ship => {
+    const sprite = createShip(ship);
+    gameObjectsContainer!.addChild(sprite);
+  });
+}
+
+// 创建飞船精灵
+function createShip(ship: GameShip): Container {
+  const container = new Container();
+  container.x = ship.position!.x;
+  container.y = ship.position!.y;
+
+  // 飞船图标
+  const graphics = new Graphics();
+  const isSelected = selectedObjects.value.has(ship.instanceId);
+  
+  // 绘制选中框
+  if (isSelected) {
+    graphics.circle(0, 0, 0.8);
+    graphics.fill({ color: 0x00FFFF, alpha: 0.3 });
+    graphics.circle(0, 0, 0.8);
+    graphics.stroke({ width: 0.1, color: 0x00FFFF });
+  }
+
+  // 绘制飞船主体
+  graphics.circle(0, 0, 0.5);
+  graphics.fill({ color: 0x4444FF });
+  graphics.circle(0, 0, 0.5);
+  graphics.stroke({ width: 0.1, color: 0x000000 });
+
+  container.addChild(graphics);
+
+  // 飞船ID标签
+  const label = new Text({
+    text: ship.instanceId,
+    style: new TextStyle({
+      fontSize: 0.5,
+      fill: 0x000000,
+      fontFamily: 'Courier New, monospace',
+      fontWeight: '700',
+    }),
+  });
+  label.anchor.set(0, 0.5);
+  label.x = 0.7;
+  label.y = 0;
+  container.addChild(label);
+
+  // 添加交互
+  container.eventMode = 'static';
+  container.cursor = 'pointer';
+  container.on('click', () => {
+    handleObjectClick(ship.instanceId);
+  });
+
+  return container;
+}
+
+// 创建资源节点精灵
+function createResourceNode(node: GameResourceNode): Container {
+  const container = new Container();
+  container.x = node.position.x;
+  container.y = node.position.y;
+
+  const graphics = new Graphics();
+  
+  // 绘制资源节点
+  graphics.rect(-0.4, -0.4, 0.8, 0.8);
+  graphics.fill({ color: 0xFF8800 });
+  graphics.rect(-0.4, -0.4, 0.8, 0.8);
+  graphics.stroke({ width: 0.1, color: 0x000000 });
+
+  container.addChild(graphics);
+
+  // 资源标签
+  const label = new Text({
+    text: node.resourceType,
+    style: new TextStyle({
+      fontSize: 0.4,
+      fill: 0x000000,
+      fontFamily: 'Courier New, monospace',
+      fontWeight: '700',
+    }),
+  });
+  label.anchor.set(0, 0.5);
+  label.x = 0.6;
+  label.y = 0;
+  container.addChild(label);
+
+  // 添加交互
+  container.eventMode = 'static';
+  container.cursor = 'pointer';
+  container.on('click', () => {
+    console.log('点击资源节点:', node.id);
+  });
+
+  return container;
+}
+
+// 创建建筑精灵
+function createStructure(structure: GameStructure): Container {
+  const container = new Container();
+  container.x = structure.position.x;
+  container.y = structure.position.y;
+
+  const graphics = new Graphics();
+  const isSelected = selectedObjects.value.has(structure.id);
+
+  // 绘制选中框
+  if (isSelected) {
+    graphics.rect(-0.9, -0.9, 1.8, 1.8);
+    graphics.fill({ color: 0x00FF00, alpha: 0.3 });
+    graphics.rect(-0.9, -0.9, 1.8, 1.8);
+    graphics.stroke({ width: 0.1, color: 0x00FF00 });
+  }
+
+  // 绘制建筑主体
+  graphics.rect(-0.6, -0.6, 1.2, 1.2);
+  graphics.fill({ color: 0x888888 });
+  graphics.rect(-0.6, -0.6, 1.2, 1.2);
+  graphics.stroke({ width: 0.15, color: 0x000000 });
+
+  container.addChild(graphics);
+
+  // 建筑标签
+  const label = new Text({
+    text: structure.type,
+    style: new TextStyle({
+      fontSize: 0.5,
+      fill: 0x000000,
+      fontFamily: 'Courier New, monospace',
+      fontWeight: '700',
+    }),
+  });
+  label.anchor.set(0, 0.5);
+  label.x = 0.8;
+  label.y = 0;
+  container.addChild(label);
+
+  // 添加交互
+  container.eventMode = 'static';
+  container.cursor = 'pointer';
+  container.on('click', () => {
+    handleObjectClick(structure.id);
+  });
+
+  return container;
+}
+
+// 更新游戏对象
+function updateGameObjects() {
+  // 这里会接收后端更新并重新渲染对象
+  // 暂时保持静态
+}
+
+// 处理对象点击
+function handleObjectClick(objectId: string, event?: MouseEvent) {
+  console.log('选中对象:', objectId);
+  
+  // 按住Ctrl多选
+  if (event && (event.ctrlKey || event.metaKey)) {
+    if (selectedObjects.value.has(objectId)) {
+      selectedObjects.value.delete(objectId);
+    } else {
+      selectedObjects.value.add(objectId);
+    }
+  } else {
+    // 单选
+    selectedObjects.value.clear();
+    selectedObjects.value.add(objectId);
+  }
+  
+  // 重新渲染以显示选中状态
+  renderGameObjects();
+}
+
+// 鼠标按下 - 开始框选或放置建筑
+function handlePointerDown(event: any) {
+  if (event.button !== 0) return; // 只处理左键
+  
+  const worldPos = viewport!.toWorld(event.global);
+  
+  // 如果正在放置建筑，点击确认放置
+  if (isPlacingBuilding.value && placingBuildingId.value) {
+    placeBuilding(worldPos.x, worldPos.y);
+    return;
+  }
+  
+  // 否则开始框选
+  isDraggingSelection.value = true;
+  selectionStart.value = { x: worldPos.x, y: worldPos.y };
+  selectionEnd.value = { x: worldPos.x, y: worldPos.y };
+}
+
+// 鼠标移动 - 更新框选框或建筑预览
+function handlePointerMove(event: any) {
+  const worldPos = viewport!.toWorld(event.global);
+  
+  // 如果正在放置建筑，显示预览
+  if (isPlacingBuilding.value) {
+    drawBuildingPreview(worldPos.x, worldPos.y);
+    return;
+  }
+  
+  // 否则处理框选
+  if (!isDraggingSelection.value || !selectionStart.value) return;
+  
+  selectionEnd.value = { x: worldPos.x, y: worldPos.y };
+  
+  // 绘制框选框
+  drawSelectionBox();
+}
+
+// 鼠标松开 - 完成框选
+function handlePointerUp(event: any) {
+  if (!isDraggingSelection.value || !selectionStart.value || !selectionEnd.value) {
+    isDraggingSelection.value = false;
+    return;
+  }
+  
+  const start = selectionStart.value;
+  const end = selectionEnd.value;
+  
+  // 计算框选矩形
+  const minX = Math.min(start.x, end.x);
+  const maxX = Math.max(start.x, end.x);
+  const minY = Math.min(start.y, end.y);
+  const maxY = Math.max(start.y, end.y);
+  
+  // 如果是点击（框选范围很小），则取消选择
+  const isClick = Math.abs(end.x - start.x) < 0.5 && Math.abs(end.y - start.y) < 0.5;
+  
+  if (isClick) {
+    // 点击空白处取消选择
+    if (!event.ctrlKey && !event.metaKey) {
+      selectedObjects.value.clear();
+      renderGameObjects();
+    }
+  } else {
+    // 框选飞船和建筑
+    const selected = new Set<string>();
+    
+    ships.value.forEach((ship, id) => {
+      if (ship.position &&
+          ship.position.x >= minX && ship.position.x <= maxX &&
+          ship.position.y >= minY && ship.position.y <= maxY) {
+        selected.add(id);
+      }
+    });
+    
+    structures.value.forEach((structure, id) => {
+      if (structure.position.x >= minX && structure.position.x <= maxX &&
+          structure.position.y >= minY && structure.position.y <= maxY) {
+        selected.add(id);
+      }
+    });
+    
+    // 更新选中对象
+    if (event.ctrlKey || event.metaKey) {
+      // Ctrl多选
+      selected.forEach(id => selectedObjects.value.add(id));
+    } else {
+      selectedObjects.value = selected;
+    }
+    
+    renderGameObjects();
+  }
+  
+  // 清除框选状态
+  isDraggingSelection.value = false;
+  selectionStart.value = null;
+  selectionEnd.value = null;
+  if (selectionBox) {
+    selectionBox.clear();
+  }
+}
+
+// 绘制框选框
+function drawSelectionBox() {
+  if (!selectionBox || !selectionStart.value || !selectionEnd.value) return;
+  
+  selectionBox.clear();
+  
+  const start = selectionStart.value;
+  const end = selectionEnd.value;
+  const width = end.x - start.x;
+  const height = end.y - start.y;
+  
+  selectionBox.rect(start.x, start.y, width, height);
+  selectionBox.fill({ color: 0x00FF00, alpha: 0.1 });
+  selectionBox.rect(start.x, start.y, width, height);
+  selectionBox.stroke({ width: 0.1, color: 0x00FF00 });
+}
+
+// 右键命令或取消
+function handleRightClick(event: any) {
+  event.preventDefault();
+  
+  // 如果正在放置建筑，右键取消
+  if (isPlacingBuilding.value) {
+    cancelBuildingPlacement();
+    return;
+  }
+  
+  const worldPos = viewport!.toWorld(event.global);
+  console.log('右键点击:', worldPos);
+  
+  // 如果有选中的飞船，下达移动命令
+  const selectedShips = Array.from(selectedObjects.value).filter(id => ships.value.has(id));
+  
+  if (selectedShips.length > 0) {
+    console.log(`命令 ${selectedShips.length} 艘飞船移动到 (${worldPos.x.toFixed(2)}, ${worldPos.y.toFixed(2)})`);
+    
+    // TODO: 发送移动命令到后端
+    selectedShips.forEach(shipId => {
+      const ship = ships.value.get(shipId);
+      if (ship) {
+        // 临时：直接更新位置（后续通过后端处理）
+        ship.position = { x: worldPos.x, y: worldPos.y, z: 0 };
+      }
+    });
+    
+    renderGameObjects();
+  }
+}
+
 function getCelestialIconPath(type: CelestialType | string): string {
   const iconMap: Record<string, string> = {
     'star': '/assets/icons/celestial/star.svg',
@@ -321,6 +773,116 @@ function goBack() {
   emit('back');
 }
 
+// 获取选中单位信息
+function getSelectedUnitsInfo() {
+  const units: Array<{ id: string; type: 'ship' | 'structure'; data: GameShip | GameStructure }> = [];
+  
+  selectedObjects.value.forEach(id => {
+    if (ships.value.has(id)) {
+      units.push({
+        id,
+        type: 'ship',
+        data: ships.value.get(id)!,
+      });
+    } else if (structures.value.has(id)) {
+      units.push({
+        id,
+        type: 'structure',
+        data: structures.value.get(id)!,
+      });
+    }
+  });
+  
+  return units;
+}
+
+// 清空选择
+function clearSelection() {
+  selectedObjects.value.clear();
+  renderGameObjects();
+}
+
+// 处理命令
+function handleCommand(command: string, params: any) {
+  console.log('执行命令:', command, params);
+  // TODO: 发送命令到后端
+}
+
+// 处理拆除建筑
+function handleDemolish(structureId: string) {
+  console.log('拆除建筑:', structureId);
+  // TODO: 发送拆除命令到后端
+  structures.value.delete(structureId);
+  selectedObjects.value.delete(structureId);
+  renderGameObjects();
+}
+
+// 开始建筑放置
+function startBuildingPlacement(buildingId: string) {
+  console.log('开始放置建筑:', buildingId);
+  isPlacingBuilding.value = true;
+  placingBuildingId.value = buildingId;
+}
+
+// 取消建筑放置
+function cancelBuildingPlacement() {
+  console.log('取消建筑放置');
+  isPlacingBuilding.value = false;
+  placingBuildingId.value = null;
+  if (buildingPreview) {
+    buildingPreview.clear();
+  }
+}
+
+// 绘制建筑预览
+function drawBuildingPreview(x: number, y: number) {
+  if (!buildingPreview) return;
+  
+  buildingPreview.clear();
+  
+  // 对齐到网格
+  const gridX = Math.round(x);
+  const gridY = Math.round(y);
+  
+  // 绘制半透明建筑预览
+  buildingPreview.rect(gridX - 0.6, gridY - 0.6, 1.2, 1.2);
+  buildingPreview.fill({ color: 0x00FF00, alpha: 0.3 });
+  buildingPreview.rect(gridX - 0.6, gridY - 0.6, 1.2, 1.2);
+  buildingPreview.stroke({ width: 0.15, color: 0x00FF00 });
+}
+
+// 放置建筑
+function placeBuilding(x: number, y: number) {
+  if (!placingBuildingId.value) return;
+  
+  // 对齐到网格
+  const gridX = Math.round(x);
+  const gridY = Math.round(y);
+  
+  console.log(`放置建筑 ${placingBuildingId.value} 在 (${gridX}, ${gridY})`);
+  
+  // 创建新建筑
+  const newStructure: GameStructure = {
+    id: `structure_${Date.now()}`,
+    type: placingBuildingId.value,
+    position: { x: gridX, y: gridY, z: 0 },
+    cargo: new Map(),
+    cargoCapacity: 500,
+    cargoUsed: 0,
+    ownerId: 'player_1',
+  };
+  
+  structures.value.set(newStructure.id, newStructure);
+  
+  // TODO: 发送建造命令到后端
+  
+  // 渲染新建筑
+  renderGameObjects();
+  
+  // 不取消放置模式，允许连续放置
+  // cancelBuildingPlacement();
+}
+
 function cleanup() {
   if (app) {
     app.destroy(true, { children: true });
@@ -328,6 +890,8 @@ function cleanup() {
   }
   viewport = null;
   bodiesContainer = null;
+  gameObjectsContainer = null;
+  selectionBox = null;
 }
 </script>
 

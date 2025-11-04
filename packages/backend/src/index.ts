@@ -12,7 +12,6 @@ import { getGameEngine } from '@/services/GameEngine';
 import { GameInitializer } from '@/services/GameInitializer';
 import authRoutes from '@/routes/authRoutes';
 import gameDataRoutes from '@/routes/gameDataRoutes';
-import codeRoutes from '@/routes/codeRoutes';
 import galaxyRoutes from '@/routes/galaxyRoutes';
 
 const app = express();
@@ -34,7 +33,6 @@ app.use(express.urlencoded({ extended: true }));
 // 路由
 app.use('/api/auth', authRoutes);
 app.use('/api/game-data', gameDataRoutes);
-app.use('/api/code', codeRoutes);
 app.use('/api/galaxy', galaxyRoutes);
 
 // 健康检查
@@ -58,6 +56,12 @@ async function startServer() {
         const gameEngine = getGameEngine();
         const gameInitializer = new GameInitializer(gameEngine);
         gameInitializer.initializeTestEnvironment();
+        
+        // 设置游戏引擎的状态广播回调
+        gameEngine.setStateBroadcaster(() => {
+            socketEventsHandler.broadcastGameState();
+        });
+        
         gameEngine.start();
 
         // 启动服务器

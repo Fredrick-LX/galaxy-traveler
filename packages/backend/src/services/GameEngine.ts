@@ -21,6 +21,7 @@ export class GameEngine {
   private playerStates: Map<string, PlayerGameState>;
   private isRunning: boolean = false;
   private tickInterval?: NodeJS.Timeout;
+  private stateBroadcaster?: () => void;
 
   constructor() {
     this.world = {
@@ -30,6 +31,13 @@ export class GameEngine {
       structures: new Map(),
     };
     this.playerStates = new Map();
+  }
+
+  /**
+   * 设置状态广播器
+   */
+  setStateBroadcaster(broadcaster: () => void): void {
+    this.stateBroadcaster = broadcaster;
   }
 
   /**
@@ -80,8 +88,10 @@ export class GameEngine {
     // 3. 清理已完成的动作
     this.cleanupCompletedActions(currentTick);
 
-    // 4. 发送tick更新给所有玩家
-    this.broadcastTickUpdate(currentTick);
+    // 4. 广播游戏状态
+    if (this.stateBroadcaster) {
+      this.stateBroadcaster();
+    }
   }
 
   /**

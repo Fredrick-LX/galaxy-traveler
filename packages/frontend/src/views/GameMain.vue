@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import GalaxyMap from '../components/GalaxyMap.vue';
 import GalaxyView from '../components/GalaxyView.vue';
-import CodeEditor from './CodeEditor.vue';
 import type { Galaxy } from '@galaxy-traveler/shared';
 import type { User } from '../types/auth';
 
@@ -12,10 +11,7 @@ const router = useRouter();
 const currentView = ref<'map' | 'galaxy'>('map');
 const selectedGalaxy = ref<Galaxy | null>(null);
 const showMenu = ref(false);
-const showCodeEditor = ref(false);
-const showConsole = ref(false);
 const user = ref<User | null>(null);
-const consoleLogs = ref<Array<{time: number, type: 'info' | 'error' | 'success', message: string}>>([]);
 
 onMounted(() => {
     console.log('游戏主界面已加载');
@@ -37,15 +33,6 @@ function backToMap() {
     selectedGalaxy.value = null;
 }
 
-function navigateToCode() {
-    showCodeEditor.value = true;
-    showMenu.value = false;
-}
-
-function closeCodeEditor() {
-    showCodeEditor.value = false;
-}
-
 function backToHome() {
     router.push('/');
     showMenu.value = false;
@@ -55,32 +42,6 @@ function logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_info');
     router.push('/login');
-}
-
-function toggleConsole() {
-    showConsole.value = !showConsole.value;
-}
-
-function addLog(message: string, type: 'info' | 'error' | 'success' = 'info') {
-    consoleLogs.value.push({
-        time: Date.now(),
-        type,
-        message,
-    });
-}
-
-function clearConsole() {
-    consoleLogs.value = [];
-}
-
-function formatTime(timestamp: number): string {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('zh-CN', { 
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
 }
 </script>
 
@@ -94,14 +55,6 @@ function formatTime(timestamp: number): string {
                 </div>
             </div>
             <div class="header-actions">
-                <button @click="navigateToCode" class="action-button">
-                    <img src="/assets/icons/ui/code.svg" alt="代码" class="btn-icon" />
-                    代码
-                </button>
-                <button @click="toggleConsole" class="action-button">
-                    <img src="/assets/icons/ui/console.svg" alt="控制台" class="btn-icon" />
-                    控制台
-                </button>
                 <button @click="showMenu = !showMenu" class="action-button menu-btn">
                     <img src="/assets/icons/ui/menu.svg" alt="菜单" class="btn-icon" />
                     菜单
@@ -132,37 +85,6 @@ function formatTime(timestamp: number): string {
                 :galaxy="selectedGalaxy"
                 @back="backToMap"
             />
-        </div>
-
-        <!-- 代码编辑器窗口 -->
-        <CodeEditor 
-            v-if="showCodeEditor" 
-            @close="closeCodeEditor"
-            @log="addLog"
-        />
-
-        <!-- 底部控制台 -->
-        <div v-if="showConsole" class="bottom-console">
-            <div class="console-header">
-                <h3>控制台</h3>
-                <div class="console-actions">
-                    <button @click="clearConsole" class="console-btn">清空</button>
-                    <button @click="toggleConsole" class="console-btn">✕</button>
-                </div>
-            </div>
-            <div class="console-output">
-                <div
-                    v-for="(log, index) in consoleLogs"
-                    :key="index"
-                    :class="['console-line', log.type]"
-                >
-                    <span class="log-time">{{ formatTime(log.time) }}</span>
-                    <span class="log-message">{{ log.message }}</span>
-                </div>
-                <div v-if="consoleLogs.length === 0" class="console-empty">
-                    控制台输出将在这里显示...
-                </div>
-            </div>
         </div>
     </div>
 </template>
@@ -316,102 +238,5 @@ function formatTime(timestamp: number): string {
     flex: 1;
     position: relative;
     overflow: hidden;
-}
-
-.bottom-console {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 200px;
-    background: #FFFFFF;
-    border-top: 3px solid #000000;
-    z-index: 500;
-    display: flex;
-    flex-direction: column;
-}
-
-.console-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    background: #EEEEEE;
-    border-bottom: 2px solid #000000;
-}
-
-.console-header h3 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: 'Courier New', monospace;
-    color: #000000;
-}
-
-.console-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.console-btn {
-    padding: 4px 12px;
-    background: #FFFFFF;
-    border: 2px solid #000000;
-    border-radius: 0;
-    color: #000000;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: 'Courier New', monospace;
-    transition: all 0.1s;
-}
-
-.console-btn:hover {
-    background: #000000;
-    color: #FFFFFF;
-}
-
-.console-output {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 13px;
-    background: #FFFFFF;
-}
-
-.console-line {
-    padding: 6px 8px;
-    margin-bottom: 4px;
-    border-left: 3px solid transparent;
-}
-
-.console-line.error {
-    background: #FFE6E6;
-    border-left-color: #FF0000;
-    color: #CC0000;
-}
-
-.console-line.success {
-    background: #E6FFE6;
-    border-left-color: #00CC00;
-    color: #006600;
-}
-
-.console-line.info {
-    color: #000000;
-}
-
-.log-time {
-    color: #666666;
-    margin-right: 8px;
-    font-weight: 700;
-}
-
-.console-empty {
-    color: #999999;
-    font-style: italic;
-    padding: 20px;
-    text-align: center;
 }
 </style>
